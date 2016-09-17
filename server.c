@@ -5,68 +5,126 @@
 #include <fcntl.h>
 #include <string.h>
 #include "blackjacklib.h"
-
-#define MAX_BUF 1024
+#include <errno.h>
+#include "server.h"
 
 int main() {
-	
-    char * srvfifo= "/tmp/srv";
-    char * clientin;
-    char * clientout;
+
+    struct ClientInfo * clientTable[MAX_PLAYERS];
+    int connectedBooleanTable[MAX_PLAYERS] = {0};
+
+    int srvfd;
+
+    startServer(&srvfd);
+
+    while(1) {
+        acceptConnections(srvfd, clientTable, connectedBooleanTable);
+    }
+
+    return 0;
+}
+
+int startServer(int * srvfd) {
+
+    /* Creating SRV FIFO */
+    unlink(SRV_PATH);
+    mkfifo(SRV_PATH, 0666);
+
+    /* Opening SRV FD */
+    *srvfd = open(SRV_PATH, O_RDONLY | O_NONBLOCK);
+    
+    return 1;
+}
+
+int acceptConnections(int srvfd, struct ClientInfo ** clientTable, int * connectedBooleanTable) {
+
+    int index;
+
+    struct ClientInfo * clientInfo;
 
     char buffer[MAX_BUF];
 
-    int srvfd;
-    int clientinfd;
-    int clientoutfd;
+    /* If Server has reached max capacity */
+    if (emptySpots(connectedBooleanTable) == 0) {
+        return 0;
+    }
 
-    clientin = malloc(30); //NO MAGIC NUMBERS
-    clientout = malloc(30);
+    /* If there is nothing to read */
+    if (read(srvfd, buffer, MAX_BUF) <= 0) {
+        return 0;
+    }
 
-    unlink(srvfifo);
-    /* Creo la FIFO de entrada del Servidor */
-    mkfifo(srvfifo, 0666);
+    /* Creating ClientInfo for new connection */
+    index = firstEmptySpot(connectedBooleanTable);
+    clientInfo = createClientInfo(index, clientTable, connectedBooleanTable);
 
-    /* Creo la FIFO de SALIDA del cliente */
-    //mkfifo(clientout, 0666);
+    /* Allocating */
+    clientInfo->clientin = malloc(MAX_PATH);
+    clientInfo->clientout = malloc(MAX_PATH);
 
-    srvfd = open(srvfifo, O_RDONLY);
+    /* Copying CLIENTIN FIFO PATH to ClientInfo */
+    strcpy(clientInfo->clientin, buffer);
 
+    /* Opening CLIENTIN FD */
+    clientInfo->clientinfd = open(clientInfo->clientin, O_WRONLY);
 
-    printf("Reading Client INPUT file path.\n");
-    read(srvfd, buffer, MAX_BUF);
-    printf("Path: %s\n", buffer);
+    /* Creating CLIENTOUT FIFO PATH */
+    strncpy(clientInfo->clientout, clientInfo->clientin, indexOf(clientInfo->clientin,'C'));
+    strcat(clientInfo->clientout, "CLIENTOUT");
 
-    strcpy(clientin, buffer);
+    /* Creating CLIENTOUT FIFO */
+    unlink(clientInfo->clientout);
+    mkfifo(clientInfo->clientout, 0666);
 
-    clearBuffer(buffer, MAX_BUF);
+    /* Opening CLIENTOUT FD */
+    clientInfo->clientoutfd = open(clientInfo->clientout, O_RDONLY | O_NONBLOCK);
 
-    clientinfd = open(clientin, O_WRONLY);
+    /* Writing CLIENTOUT FIFO PATH to Client */
+    write(clientInfo->clientinfd, clientInfo->clientout, MAX_BUF);
 
-    /* Creo el PATH del CLIENTOUT */
-    strncpy(clientout, clientin, indexOf(clientin,'C'));
-    strcat(clientout, "CLIENTOUT");
-
-    unlink(clientout);
-    mkfifo(clientout, 0666);
-
-    clientoutfd = open(clientout, O_RDONLY | O_NONBLOCK);
-
-    printf("Writing in Client INPUT: %s\n", clientout);
-    write(clientinfd, clientout, MAX_BUF);
-
-    clearBuffer(buffer, MAX_BUF);
-    while(read(clientoutfd, buffer, MAX_BUF) <= 0);
-
-    printf("%s\n", buffer);
-
-    close(srvfd);
-    close(clientinfd);
-    close(clientoutfd);
-
-    /* Remuevo la FIFO */
-    unlink(srvfifo);
-    unlink(clientout);
-
+    /* Waiting for Client response */
+    while(read(clientInfo->clientoutfd, buffer, MAX_BUF) <= 0);
+    if (strcmp(buffer, SUCCESS) == 0) {
+        strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
+        write(clientInfo->clientinfd, buffer, MAX_BUF);
+        printf("CONNECTED\n");
+        return 1;
+    }
+    //TODO: ELSE ERROR.
     return 0;
+
+}
+
+struct ClientInfo * createClientInfo(int index, struct ClientInfo ** clientTable, int * connectedBooleanTable) {
+
+    connectedBooleanTable[index] = 1;
+
+    return clientTable[index] = malloc(sizeof(struct ClientInfo));
+
+}
+
+
+int emptySpots(int connectedBooleanTable[]) {
+    int i;
+    int count = 0;
+
+    for (i = 0; i < MAX_PLAYERS; i++) {
+        if (connectedBooleanTable[i] == 0) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+int firstEmptySpot(int connectedBooleanTable[]) {
+    int i;
+
+    for (i = 0; i < MAX_PLAYERS; i++) {
+        if (connectedBooleanTable[i] == 0) {
+            return i;
+        }
+    }
+
+    return -1;
 }

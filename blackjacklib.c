@@ -10,10 +10,10 @@ void clearBuffer(char * buffer, int size) {
 
 int indexOf(char * str, char letter) {
 	int i = 0;
-	while ( str[i] != '0' && str[i] != letter ) {
+	while ( str[i] != '\0' && str[i] != letter ) {
 		i++;
 	}
-	if (str[i] == '0') {
+	if (str[i] == '\0') {
 		return -1;
 	} else {
 		return i;
