@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 #include "blackjacklib.h"
-#include <errno.h>
 #include "client.h"
 
 
@@ -71,9 +64,17 @@ int requestConnection(char * serverFifo, struct ClientInfo * clientInfo) {
     while(read(clientInfo->clientinfd, buffer, MAX_BUF) <= 0);
     if (strcmp(buffer, SUCCESS) == 0) {
         printf("CONNECTED\n");
+        close(srvfd);
         return 1;
     }
     
     return 0;
 
+}
+
+void disconnect(struct ClientInfo* clientInfo) {
+    close(clientInfo->clientinfd);
+    close(clientInfo->clientoutfd);
+    unlink(clientInfo->clientin);
+    exit(1);
 }

@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 #include "blackjacklib.h"
-#include <errno.h>
 #include "server.h"
 
 int main() {
@@ -87,7 +80,7 @@ int acceptConnections(int srvfd, struct ClientInfo ** clientTable, int * connect
     if (strcmp(buffer, SUCCESS) == 0) {
         strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
         write(clientInfo->clientinfd, buffer, MAX_BUF);
-        printf("CONNECTED\n");
+        printf("CLIENT %d CONNECTED\n", index);
         return 1;
     }
     //TODO: ELSE ERROR.
@@ -127,4 +120,16 @@ int firstEmptySpot(int connectedBooleanTable[]) {
     }
 
     return -1;
+}
+
+/*When clients are playing, is should check if the clientin fifo is linked. In case its not it disconnects the player */
+int disconnectClient(int clientIndex, struct ClientInfo ** clientTable, int * connectedBooleanTable) {
+    if (connectedBooleanTable[clientIndex] == 0) {
+        perror("Client was already disconnected.");
+        return 0;
+    }
+    close(clientTable[clientIndex]->clientinfd);
+    close(clientTable[clientIndex]->clientoutfd);
+    unlink(clientTable[clientIndex]->clientout);
+    return 1;
 }
