@@ -1,9 +1,9 @@
 #ifndef SERVER_H
 #define SERVER_H
 #endif
+#include "com.h"
 
-int startServer(int * srvfd);
-int acceptConnections(int srvfd, struct ClientInfo* clientTable[], int connectedBooleanTable[]);
-struct ClientInfo * createClientInfo(int index, struct ClientInfo * clientTable[], int connectedBooleanTable[]);
-int emptySpots(int connectedBooleanTable[]);
-int firstEmptySpot(int connectedBooleanTable[]);
+int startServer();
+int emptySpots(int * connectedBoolean);
+int firstEmptySpot(int * connectedBoolean);
+void addClient(Connection * connection, Connection ** clientTable, int * connectedBoolean);
