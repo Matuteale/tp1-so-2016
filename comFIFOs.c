@@ -149,3 +149,15 @@ int comRead(Connection * connection, char * dataToRead, int size) {
     return read(connection->inputFD, dataToRead, MAX_BUF);
 
 }
+
+//TODO: Decidir si hacemos que retorne int segun si desconecta correctamente o lo dejamos asi
+void disconnect(Connection * connection) {
+    close(connection->inputFD);
+    close(connection->outputFD);
+    unlink(connection->input->path);
+    free(connection->input->path);
+    free(connection->output->path);
+    free(connection->input);
+    free(connection->output);
+    free(connection);
+}

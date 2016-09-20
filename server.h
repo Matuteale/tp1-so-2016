@@ -3,7 +3,17 @@
 #endif
 #include "com.h"
 
+typedef struct {
+	Connection * clientTable[MAX_PLAYERS];
+    int connectedBoolean[MAX_PLAYERS];
+} ServerData;
+
+ServerData * newServerData();
+
 int startServer();
-int emptySpots(int * connectedBoolean);
-int firstEmptySpot(int * connectedBoolean);
-void addClient(Connection * connection, Connection ** clientTable, int * connectedBoolean);
+int emptySpots(ServerData * serverData);
+int firstEmptySpot(ServerData * serverData);
+void addClient(Connection * connection, ServerData * serverData);
+int disconnectClient(int index, ServerData * serverData);
+int hasBeenDisconnected(int index, ServerData * serverData);
+void checkConnections(ServerData * serverData);

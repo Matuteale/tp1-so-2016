@@ -2,3 +2,5 @@
 #define CLIENT_H
 #endif
 #include "com.h"
+
+void disconnectClient(Connection * connection);

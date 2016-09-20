@@ -21,4 +21,4 @@ Address * listen(Address * addr);
 Connection * accept(Address * addressToAccept);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
-int disconnect(Connection * connection);
+void disconnect(Connection * connection);

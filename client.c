@@ -6,20 +6,24 @@ int main() {
 
     char c;
 
-    // struct ClientInfo* clientInfo = (struct ClientInfo*) malloc(sizeof(struct ClientInfo));
-
     Address * srvaddr = newAddress();
+    Connection * connection;
 
     strcpy(srvaddr->path, SRV_PATH);
 
-    connect(srvaddr);
+    connection = connect(srvaddr);
 
     while( (c = getchar()) != '\n') {
         if (c == 'q') {
-            exit(1);
+            disconnectClient(connection);
         }
     }
 
     return 0;
 
+}
+
+void disconnectClient(Connection * connection) {
+    disconnect(connection);
+    exit(1);
 }
