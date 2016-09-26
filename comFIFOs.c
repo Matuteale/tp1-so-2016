@@ -4,7 +4,9 @@
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
     connection->input = malloc(MAX_BUF);
+    memset(connection->input, 0, MAX_BUF);
     connection->output = malloc(MAX_BUF);
+    memset(connection->output, 0, MAX_BUF);
     return connection;
 }
 
@@ -135,13 +137,13 @@ Connection * comConnect(char * addr) {
 
 int comWrite(Connection * connection, char * dataToWrite, int size) {
 
-    return write(connection->outputFD, dataToWrite, MAX_BUF);
+    return write(connection->outputFD, dataToWrite, size);
 
 }
 
 int comRead(Connection * connection, char * dataToRead, int size) {
 
-    return read(connection->inputFD, dataToRead, MAX_BUF);
+    return read(connection->inputFD, dataToRead, size);
 
 }
 
@@ -152,7 +154,7 @@ void disconnect(Connection * connection) {
     unlink(connection->input);
     free(connection->input);
     free(connection->output);
-    free(connection->input);
-    free(connection->output);
+    //free(connection->input);
+    //free(connection->output);
     free(connection);
 }

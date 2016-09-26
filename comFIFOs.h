@@ -7,4 +7,4 @@ typedef struct Connection {
     char * output; //WRITE
     int inputFD;
     int outputFD;
-} Connection;
+};

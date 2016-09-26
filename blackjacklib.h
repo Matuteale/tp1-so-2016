@@ -2,7 +2,7 @@
 #define BLACKJACKLIB_H
 #endif
 
-#define SRV_PATH "/tmp/srv"
+#define SRV_PATH "/tmp/srv\0"
 #define MAX_BUF 1024
 #define MAX_PATH 64
 #define MAX_PID_LENGTH 20

@@ -14,7 +14,7 @@ int main() {
 
     startServer();
 
-    char * srv;
+    char * srv = malloc(sizeof(SRV_PATH));
     strcpy(srv, SRV_PATH);
 
     while(1) {
@@ -69,11 +69,16 @@ int firstEmptySpot(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
-
+    char* buffer = malloc(sizeof("Hola\0"));
+    buffer = "Hola";
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
+    printf("%X\n", connection);
+    printf("%X\n", serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 1;
     printf("Client connected in spot %d.\n", index);
+    comWrite(serverData->clientTable[index], buffer, sizeof(buffer)); 
+    printf("%X\n", serverData->clientTable[index]);
 }
 
 int disconnectClient(int index, ServerData * serverData) {

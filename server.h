@@ -2,11 +2,12 @@
 #define SERVER_H
 #endif
 #include "com.h"
+#include "comFIFOs.h"
 
-typedef struct {
+typedef struct ServerData{
 	Connection * clientTable[MAX_PLAYERS];
     int connectedBoolean[MAX_PLAYERS];
-} ServerData;
+}ServerData;
 
 ServerData * newServerData();
 
