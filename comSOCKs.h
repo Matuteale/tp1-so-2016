@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 
 
-struct Connection
+typedef struct Connection
 {
 	char* ip;
 	in_port_t port; // equivalente a uint16_t
@@ -15,6 +15,3 @@ struct Connection
 
 
 /** Address format xxx.xxx.xxx.xxx:PPPPP **/
-typedef struct Address {
-    char * path;
-} Address;

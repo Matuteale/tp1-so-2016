@@ -14,15 +14,15 @@ int main() {
 
     startServer();
 
-    Address * srv = newAddress();
-    strcpy(srv->path, SRV_PATH);
+    char * srv;
+    strcpy(srv, SRV_PATH);
 
     while(1) {
         if (emptySpots(serverData) > 0) {
-            Address * listened = listen(srv);
+            char * listened = comListen(srv);
             if (listened != NULL) {
                 printf("Connection detected\n");
-                addClient(accept(listened), serverData);
+                addClient(comAccept(listened), serverData);
 
             }
         }
@@ -87,7 +87,7 @@ int disconnectClient(int index, ServerData * serverData) {
 }
 
 int hasBeenDisconnected(int index, ServerData * serverData) {
-    if( access(serverData->clientTable[index]->output->path, F_OK ) != -1 ) {
+    if( access(serverData->clientTable[index]->output, F_OK ) != -1 ) {
         return 0;
     }
     return 1;

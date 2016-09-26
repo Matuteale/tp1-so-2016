@@ -6,12 +6,12 @@ int main() {
 
     char c;
 
-    Address * srvaddr = newAddress();
+    char * srvaddr = malloc(sizeof(SRV_PATH));
     Connection * connection;
 
-    strcpy(srvaddr->path, SRV_PATH);
+    strcpy(srvaddr, SRV_PATH);
 
-    connection = connect(srvaddr);
+    connection = comConnect(srvaddr);
 
     while( (c = getchar()) != '\n') {
         if (c == 'q') {

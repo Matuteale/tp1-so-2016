@@ -1,18 +1,18 @@
 #include "com.h"
+#include "comSOCKs.h"
 #include "blackjacklib.h"
 
 Connection * newConnection();
-Address * newAddress();
 
-Connection * connect(Address * addr) {
+Connection * comConnect(char * addr) {
 	Connection connection = malloc(sizeof(*connection));
 	if(connection == NULL) {
 		return NULL;
 	}
 	return 
 }
-Address * listen(Address * addr);
-Connection * accept(Address * addressToAccept);
+char * comListen(char * addr);
+Connection * comAccept(char * addressToAccept);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
 void disconnect(Connection * connection);
