@@ -11,7 +11,7 @@
 #include <errno.h>
 
 #include "comFIFOs.h"
-//#include "comSOCKs.h"
+#include "comSOCKs.h"
 
 Connection * newConnection();
 Address * newAddress();
