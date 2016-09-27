@@ -16,6 +16,8 @@ int main() {
 
     char * srv = malloc(sizeof(SRV_PATH));
     strcpy(srv, SRV_PATH);
+    char * buffer = malloc(MAX_BUF);
+    char * card = malloc(MAX_BUF);
 
     while(1) {
         if (emptySpots(serverData) > 0) {
@@ -24,6 +26,14 @@ int main() {
                 printf("Connection detected\n");
                 addClient(comAccept(listened), serverData);
 
+            }
+        }
+        for(int i = 0; i<MAX_PLAYERS; i++) {
+            if(serverData->connectedBoolean[i] != 0) {
+                //strcpy(card, "2\0");
+                //comWrite(serverData->connectedBoolean[i], buffer, sizeof(buffer));
+                comRead(serverData->clientTable[i], buffer, sizeof(buffer));
+                printf("%s\n", buffer);
             }
         }
         checkConnections(serverData);
@@ -69,16 +79,18 @@ int firstEmptySpot(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
-    char* buffer = malloc(sizeof("Hola\0"));
-    buffer = "Hola";
+    char* buffer = malloc(MAX_BUF);
+    strcpy(buffer, "Hola\0");
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     printf("%X\n", connection);
     printf("%X\n", serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 1;
     printf("Client connected in spot %d.\n", index);
-    comWrite(serverData->clientTable[index], buffer, sizeof(buffer)); 
+    comWrite(serverData->clientTable[index], buffer, MAX_BUF); 
     printf("%X\n", serverData->clientTable[index]);
+    printf("input %d\n", serverData->clientTable[index]->inputFD);
+    printf("output %d\n", serverData->clientTable[index]->outputFD);
 }
 
 int disconnectClient(int index, ServerData * serverData) {
