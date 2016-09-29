@@ -1,6 +1,9 @@
 #include "blackjacklib.h"
 #include "client.h"
 #define TEST "Para bailar la bamba"
+#define HIT 1 
+#define STAND 2 
+#define QUIT 3
 
 int main() {
 
@@ -21,25 +24,12 @@ int main() {
     printf("Output %d\n", connection->outputFD);
     comRead(connection, buffer, sizeof(buffer));
     printf("%s\n", buffer);
-    while( !finish ) {
-        comRead(connection, buffer, sizeof(buffer));
-        printf("%s\n", buffer);
+    while( 1 ) {
+
+        printf("ENTER COMMAND:\n1 = HIT\n2 = STAND\n3 = QUIT\n");
         scanf("%d", &c);
-        switch(c){
-            case 0: 
-                disconnectClient(connection);
-                finish++;
-                break;
-            case 1:
-                scanf("%s", buffer);
-                snprintf(buffer2, sizeof(buffer), "%s\0", buffer);
-                printf("%s\n", buffer);
-                comWrite(connection, buffer, sizeof(buffer));
-                break;
-            default:
-                printf("NYET\n");
-                break;
-        }
+        getCommand(c, connection);
+        while(getchar() != '\n');
         /*if (c == 'q') {
             disconnectClient(connection);
         }*/
@@ -52,4 +42,40 @@ int main() {
 void disconnectClient(Connection * connection) {
     disconnect(connection);
     exit(1);
+}
+
+
+static void hit(Connection * connection) {
+    char* buffer = malloc(MAX_BUF);
+    memset(buffer, 0, MAX_BUF);
+    snprintf(buffer, MAX_BUF, "%c\n", 'h');
+    comWrite(connection, buffer, sizeof(buffer));
+}
+
+static void stand(Connection * connection) {
+    char* buffer = malloc(MAX_BUF);
+    memset(buffer, 0, MAX_BUF);
+    snprintf(buffer, MAX_BUF, "%c\n", 's');
+    comWrite(connection, buffer, sizeof(buffer));
+}
+
+void getCommand (int command, Connection * connection) {
+
+    switch (command) {
+
+        case HIT:
+            hit(connection);
+            break;
+
+        case STAND:
+            stand(connection);
+            break;
+
+        case QUIT:
+            disconnectClient(connection);
+            break;
+
+        default:
+            break;
+    }
 }

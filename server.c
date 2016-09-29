@@ -32,10 +32,10 @@ int main() {
         }
         for(int i = 0; i<MAX_PLAYERS; i++) {
             if(serverData->connectedBoolean[i] != 0) {
-                snprintf(card, sizeof(int), "%d\n", rand() % 5);
                 //printf("%d\n", card);
                 //comWrite(serverData->clientTable[i], card, MAX_BUF);
                 if(comRead(serverData->clientTable[i], buffer, MAX_BUF) > 0) {
+                //dealWithOrder(buffer, serverData->clientTable[i]);
                 printf("%s\n", buffer);
                 printf("Arriba esta el buffer\n");
                 comWrite(serverData->clientTable[i], buffer, MAX_BUF);     
@@ -127,4 +127,28 @@ void checkConnections(ServerData * serverData) {
             }
         }
     }
+}
+
+static void deal(Connection * connection) {
+    
+}
+
+void dealWithOrder(char * buffer, Connection * connection) {
+        switch (buffer) {
+
+        case 'h':
+            deal(connection);
+            break;
+
+        case 's':
+            end(connection);
+            break;
+
+        case 'c':
+            disconnectClient(connection);
+            break;
+
+        default:
+            break;
+    }        
 }
