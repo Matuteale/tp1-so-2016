@@ -1,10 +1,11 @@
 #include "blackjacklib.h"
 #include "server.h"
-
+#include <sys/types.h>
 
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
+    fd_set set;
     return serverData;
 }
 
@@ -17,6 +18,7 @@ int main() {
     char * srv = malloc(sizeof(SRV_PATH));
     strcpy(srv, SRV_PATH);
     char * buffer = malloc(MAX_BUF);
+    char * buffer2 = malloc(MAX_BUF);
     char * card = malloc(MAX_BUF);
 
     while(1) {
@@ -30,10 +32,15 @@ int main() {
         }
         for(int i = 0; i<MAX_PLAYERS; i++) {
             if(serverData->connectedBoolean[i] != 0) {
-                //strcpy(card, "2\0");
-                //comWrite(serverData->connectedBoolean[i], buffer, sizeof(buffer));
-                comRead(serverData->clientTable[i], buffer, sizeof(buffer));
+                snprintf(card, sizeof(int), "%d\n", rand() % 5);
+                //printf("%d\n", card);
+                //comWrite(serverData->clientTable[i], card, MAX_BUF);
+                if(comRead(serverData->clientTable[i], buffer, MAX_BUF) > 0) {
                 printf("%s\n", buffer);
+                printf("Arriba esta el buffer\n");
+                comWrite(serverData->clientTable[i], buffer, MAX_BUF);     
+                }
+                
             }
         }
         checkConnections(serverData);

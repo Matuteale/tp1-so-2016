@@ -1,6 +1,6 @@
 #include "blackjacklib.h"
 #include "client.h"
-
+#define TEST "Para bailar la bamba"
 
 int main() {
 
@@ -8,6 +8,8 @@ int main() {
     int finish = 0;
     char* buffer = malloc(MAX_BUF);
     memset(buffer, 0, MAX_BUF);
+    char* buffer2 = malloc(MAX_BUF);
+    memset(buffer2, 0, MAX_BUF);
     char * srvaddr = malloc(sizeof(SRV_PATH));
     Connection * connection;
     strcpy(srvaddr, SRV_PATH);
@@ -29,6 +31,9 @@ int main() {
                 finish++;
                 break;
             case 1:
+                scanf("%s", buffer);
+                snprintf(buffer2, sizeof(buffer), "%s\0", buffer);
+                printf("%s\n", buffer);
                 comWrite(connection, buffer, sizeof(buffer));
                 break;
             default:

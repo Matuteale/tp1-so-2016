@@ -1,6 +1,8 @@
 #include "com.h"
 #include "blackjacklib.h"
 #include "comFIFOs.h"
+
+
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
     connection->input = malloc(MAX_BUF);
