@@ -49,6 +49,7 @@ static void hit(Connection * connection) {
     char* buffer = malloc(MAX_BUF);
     memset(buffer, 0, MAX_BUF);
     snprintf(buffer, MAX_BUF, "%c\n", 'h');
+    newData(buffer);
     comWrite(connection, buffer, sizeof(buffer));
 }
 
@@ -56,6 +57,7 @@ static void stand(Connection * connection) {
     char* buffer = malloc(MAX_BUF);
     memset(buffer, 0, MAX_BUF);
     snprintf(buffer, MAX_BUF, "%c\n", 's');
+    newData(buffer);
     comWrite(connection, buffer, sizeof(buffer));
 }
 

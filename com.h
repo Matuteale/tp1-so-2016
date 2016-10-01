@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include "data.h"
 
 typedef struct Connection Connection;
 

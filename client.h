@@ -5,3 +5,6 @@
 #include "comFIFOs.h"
 
 void disconnectClient(Connection * connection);
+void getCommand (int command, Connection * connection);
+static void stand(Connection * connection);
+static void hit(Connection * connection);
