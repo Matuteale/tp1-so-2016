@@ -12,6 +12,7 @@
 #define DECK_PENETRATION 0.8
 #define SUITS 4
 #define MAX_SCORE 21
+#define STARTING_MONEY 100
 
 #define SRV_PATH "/tmp/srv\0"
 #define MAX_BUF 1024

@@ -21,8 +21,10 @@ int main() {
             }
         }
         checkConnections(serverData);
-        if (serverData->connectedBoolean[0] == 1)
-        printf("LLEGA: %d\n", requestInt(serverData->clientTable[0]));
+        if (serverData->connectedBoolean[0] == 1) {
+            printf("LLEGA: %d\n", requestInt(serverData->clientTable[0]));
+            sendStr(serverData->clientTable[0], SUCCESS);
+        }
     }
 
     return 0;
@@ -80,6 +82,7 @@ void addClient(Connection * connection, ServerData * serverData) {
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
+    serverData->balance[index] = STARTING_MONEY;
     printf("Client connected in spot %d.\n", index);
 }
 
@@ -149,7 +152,7 @@ void sendAction(Connection * connection, char action) {
     str[0] = action;
     str[1] = '\0';
 
-    //sendStr(connection, str);
+    sendStr(connection, str);
 
     free(str);
 }
@@ -160,17 +163,55 @@ int requestBet() {
     return 0;
 }
 
-char requestPlay(Connection * Connection) {
+void requestBetToPlayers(ServerData * serverData) {
+
+    int index;
+
+    for(index = 0; index < MAX_PLAYERS; index++) {
+        if (serverData->connectedBoolean[index] == 1) {
+            if (hasBeenDisconnected(index, serverData)) {
+                disconnectClient(index, serverData);
+            } else {
+                //updateClientsOn(serverData, index, SETACTIVE);
+                int bet = requestBet(serverData->clientTable[index]);
+                if (bet <= 0) {
+                    disconnectClient(index, serverData);
+                } else {
+                    updateBalance(serverData, index, bet);
+                }
+                //updateClientsOn(serverData, index, SETUNACTIVE);
+            }
+        }
+    }
+}
+
+int isBetValid(ServerData * serverData, int index, int bet) {
+    if (bet < 0) {
+        return 0;
+    }
+    if (serverData->balance[index] < bet) {
+        return 0;
+    }
+    return 1;
+}
+
+void updateBalance(ServerData * serverData, int index, int bet) {
+    serverData->balance[index] -= bet;
+    //sendAction(serverData->clientTable[index], UPDATEBALANCE);
+    sendInt(serverData->clientTable[index], serverData->balance[index]);
+}
+
+char requestPlay(Connection * connection) {
 
     char ans;
 
     //sendAction(connection, PLAY);
 
-    //char * str = requestStr(connection);
+    char * str = requestStr(connection);
 
-    //ans = str[0];
+    ans = str[0];
 
-    //free(str);
+    free(str);
 
     return ans;
 }
@@ -229,8 +270,13 @@ void updateClientsOn(ServerData * serverData, int index, char action) {
                 disconnectClient(i, serverData);
             } else {
                 //sendAction(serverData->clientTable[index], action);
-                //sendInt(index);
+                sendInt(index);
             }
         }
     }
 }
+
+
+
+
+

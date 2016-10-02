@@ -122,12 +122,13 @@ void bet(ClientData * clientData) {
 
             int value = strToInt(str);
             free(str);
-            if (value != NULL) {
+            if (value != NULL && value > 0) {
                 printf("ENVIANDO: %d\n", value);
-                /*if (sendInt(value)) {
-                    valid = 1;
-                }*/
                 sendInt(clientData->serverConnection, value);
+                if (strcmp(requestStr(clientData->serverConnection), SUCCESS) == 0) {
+                    printf("YESSSSSSSSSSSSSSSSS\n");
+                    valid = 1;
+                }
             }
         }
         if (!valid) {

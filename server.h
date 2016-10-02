@@ -11,6 +11,7 @@ typedef struct ServerData{
     Table * gameTable;
     Card * deck[CARDS_PER_DECK * PLAYING_DECKS];
     int deckIndex;
+    int balance[MAX_PLAYERS];
 }ServerData;
 
 ServerData * newServerData();
