@@ -12,7 +12,18 @@ Seat * newSeat() {
 }
 
 Table * newTable() {
+	int i;
 	Table * aux = malloc(sizeof(Table));
+	aux->croupierSeat = newSeat();
+	for(i = 0; i < MAX_PLAYERS; i++) {
+		aux->playerSeats[i] = newSeat();
+	}
+}
+
+Deal * newDeal(char card, int playerNumber) {
+	Deal * aux = malloc(sizeof(Deal));
+	aux->card = card;
+	aux->playerNumber = playerNumber;
 }
 
 void deleteCard(Card * card) {
@@ -31,6 +42,10 @@ void deleteTable(Table * table) {
 		deleteSeat(table->playerSeats[i]);
 	}
 	free(table);
+}
+
+void deleteDeal(Deal * deal) {
+	free(deal);
 }
 
 int getCardValue(char figure) {

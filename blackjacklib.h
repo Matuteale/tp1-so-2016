@@ -7,6 +7,12 @@
 #include <math.h>
 #include <limits.h>
 
+#define CARDS_PER_DECK 52
+#define PLAYING_DECKS 6
+#define DECK_PENETRATION 0.8
+#define SUITS 4
+#define MAX_SCORE 21
+
 #define SRV_PATH "/tmp/srv\0"
 #define MAX_BUF 1024
 #define MAX_PATH 64
@@ -44,9 +50,12 @@ typedef struct Deal{
 Card * newCard(char figure);
 Seat * newSeat();
 Table * newTable();
+Deal * newDeal(char card, int playerNumber);
+
 void deleteCard(Card * card);
 void deleteSeat(Seat * seat);
 void deleteTable(Table * table);
+void deleteDeal(Deal * deal);
 int getCardValue(char figure);
 int getScore(Card ** hand, int handSize);
 void clearSeat(Seat * seat);
