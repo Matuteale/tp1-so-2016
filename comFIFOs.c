@@ -1,6 +1,6 @@
 #include "com.h"
-#include "blackjacklib.h"
 #include "comFIFOs.h"
+#include "blackjacklib.h"
 
 
 Connection * newConnection() {
@@ -156,7 +156,5 @@ void disconnect(Connection * connection) {
     unlink(connection->input);
     free(connection->input);
     free(connection->output);
-    //free(connection->input);
-    //free(connection->output);
     free(connection);
 }

@@ -1,6 +1,5 @@
 #ifndef COMFIFOS_H
 #define COMFIFOS_H
-#endif
 
 typedef struct Connection {
     char * input; //READ
@@ -8,3 +7,5 @@ typedef struct Connection {
     int inputFD;
     int outputFD;
 };
+
+#endif

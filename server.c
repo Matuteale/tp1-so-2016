@@ -2,24 +2,15 @@
 #include "server.h"
 #include <sys/types.h>
 
-ServerData * newServerData() {
-    ServerData * serverData = malloc(sizeof(ServerData));
-    memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
-    fd_set set;
-    return serverData;
-}
-
 int main() {
 
     ServerData * serverData = newServerData();
+    serverData->gameTable = newTable();
 
     startServer();
 
     char * srv = malloc(sizeof(SRV_PATH));
     strcpy(srv, SRV_PATH);
-    char * buffer = malloc(MAX_BUF);
-    char * buffer2 = malloc(MAX_BUF);
-    char * card = malloc(MAX_BUF);
 
     while(1) {
         if (emptySpots(serverData) > 0) {
@@ -27,20 +18,6 @@ int main() {
             if (listened != NULL) {
                 printf("Connection detected\n");
                 addClient(comAccept(listened), serverData);
-
-            }
-        }
-        for(int i = 0; i<MAX_PLAYERS; i++) {
-            if(serverData->connectedBoolean[i] != 0) {
-                //printf("%d\n", card);
-                //comWrite(serverData->clientTable[i], card, MAX_BUF);
-                if(comRead(serverData->clientTable[i], buffer, MAX_BUF) > 0) {
-                //dealWithOrder(buffer, serverData->clientTable[i]);
-                printf("%s\n", buffer);
-                printf("Arriba esta el buffer\n");
-                comWrite(serverData->clientTable[i], buffer, MAX_BUF);     
-                }
-                
             }
         }
         checkConnections(serverData);
@@ -48,6 +25,18 @@ int main() {
 
     return 0;
 }
+
+ServerData * newServerData() {
+    ServerData * serverData = malloc(sizeof(ServerData));
+    memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
+    return serverData;
+}
+
+void deleteServerData(ServerData * serverData) {
+    free(serverData);
+}
+
+// Connection related functions ---------------------------------------------------------------
 
 int startServer() {
 
@@ -86,18 +75,10 @@ int firstEmptySpot(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
-    char* buffer = malloc(MAX_BUF);
-    strcpy(buffer, "Hola\0");
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
-    printf("%X\n", connection);
-    printf("%X\n", serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 1;
     printf("Client connected in spot %d.\n", index);
-    comWrite(serverData->clientTable[index], buffer, MAX_BUF); 
-    printf("%X\n", serverData->clientTable[index]);
-    printf("input %d\n", serverData->clientTable[index]->inputFD);
-    printf("output %d\n", serverData->clientTable[index]->outputFD);
 }
 
 int disconnectClient(int index, ServerData * serverData) {
@@ -106,6 +87,8 @@ int disconnectClient(int index, ServerData * serverData) {
     }
     disconnect(serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 0;
+    setUnActive(serverData->gameTable->playerSeats[index]);
+    //updateClientsOn(serverData, index, CLEARSEAT);
     printf("Client in spot %d disconnected.\n", index);
     return 1;
 }
@@ -117,7 +100,8 @@ int hasBeenDisconnected(int index, ServerData * serverData) {
     return 1;
 }
 
-//TODO: Remover, ya que solo la usamos ahora para probar la forma de desconectar clientes, despues vamos a checkear cuando esten jugando en su turno si se desconectaron.
+//TODO: Remover, ya que solo la usamos ahora para probar la forma de desconectar clientes
+// despues vamos a checkear cuando esten jugando en su turno si se desconectaron.
 void checkConnections(ServerData * serverData) {
     int i;
     for (i = 0; i < MAX_PLAYERS; i++) {
@@ -129,26 +113,122 @@ void checkConnections(ServerData * serverData) {
     }
 }
 
-static void deal(Connection * connection) {
+// Game related functions ----------------------------------------------------------------------
+
+void generateDeck(ServerData * serverData) {
     
+    int deckIndex = 0;
+
+    int i;
+    int j;
+    int k;
+
+    for(k = 0; k < PLAYING_DECKS; k++) {
+        for (i = 0; i < SUITS; i++) {
+            serverData->deck[deckIndex++] = newCard('A');
+            for (j = 2; j <= 10; j++) {
+                serverData->deck[deckIndex++] = newCard(j + '0');
+            }
+            serverData->deck[deckIndex++] = newCard('J');
+            serverData->deck[deckIndex++] = newCard('Q');
+            serverData->deck[deckIndex++] = newCard('K');
+        }
+    }
 }
 
-void dealWithOrder(char * buffer, Connection * connection) {
-        switch (buffer) {
+void shuffleDeck(ServerData * serverData) {
 
-        case 'h':
-            deal(connection);
-            break;
+}
 
-        case 's':
-            end(connection);
-            break;
+void sendAction(Connection * connection, char action) {
 
-        case 'c':
-            disconnectClient(connection);
-            break;
+    char * str = malloc(2*sizeof(char));
 
-        default:
-            break;
-    }        
+    str[0] = action;
+    str[1] = '\0';
+
+    //sendStr(connection, str);
+
+    free(str);
+}
+
+int requestBet() {
+
+    //TODO
+    return 0;
+}
+
+char requestPlay(Connection * Connection) {
+
+    char ans;
+
+    //sendAction(connection, PLAY);
+
+    //char * str = requestStr(connection);
+
+    //ans = str[0];
+
+    //free(str);
+
+    return ans;
+}
+
+void dealCardsToPlayers(ServerData * serverData) {
+
+    int index;
+
+    for(index = 0; index < MAX_PLAYERS; index++) {
+        if (serverData->connectedBoolean[index] == 1) {
+            if (hasBeenDisconnected(index, serverData)) {
+                disconnectClient(index, serverData);
+            } else {
+                //updateClientsOn(serverData, index, SETACTIVE);
+                while(serverData->gameTable->playerSeats[index]->score <= MAX_SCORE &&
+                    requestPlay(serverData->clientTable[index]) == 'H') {
+
+                    deal(serverData, index);
+                }
+                //updateClientsOn(serverData, index, SETUNACTIVE);
+            }
+        }
+    }
+}
+
+void deal(ServerData * serverData, int index) {
+    Card * card = serverData->deck[serverData->deckIndex++];
+    addCardToSeat(card, serverData->gameTable->playerSeats[index]);
+    Deal * deal = newDeal(card->figure, index);
+    //updateClientsOnDeal(serverData, deal);
+}
+
+void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
+
+    int index;
+
+    for(index = 0; index < MAX_PLAYERS; index++) {
+        if (serverData->connectedBoolean[index] == 1) {
+            if (hasBeenDisconnected(index, serverData)) {
+                disconnectClient(index, serverData);
+            } else {
+                //sendAction(serverData->clientTable[index], DEAL);
+                //sendDeal(serverData->clientTable[index], deal);
+            }
+        }
+    }
+}
+
+void updateClientsOn(ServerData * serverData, int index, char action) {
+
+    int i;
+
+    for(i = 0; i < MAX_PLAYERS; i++) {
+        if (serverData->connectedBoolean[i] == 1) {
+            if (hasBeenDisconnected(i, serverData)) {
+                disconnectClient(i, serverData);
+            } else {
+                //sendAction(serverData->clientTable[index], action);
+                //sendInt(index);
+            }
+        }
+    }
 }

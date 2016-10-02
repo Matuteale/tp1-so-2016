@@ -1,6 +1,5 @@
 #ifndef COM_H
 #define COM_H
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +8,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include "data.h"
 
 typedef struct Connection Connection;
 
@@ -20,3 +18,5 @@ Connection * comAccept(char * addressToAccept);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
 void disconnect(Connection * connection);
+
+#endif
