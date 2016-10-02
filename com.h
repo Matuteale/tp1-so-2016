@@ -1,6 +1,5 @@
 #ifndef COM_H
 #define COM_H
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,15 +9,14 @@
 #include <string.h>
 #include <errno.h>
 
-#include "comFIFOs.h"
-//#include "comSOCKs.h"
+typedef struct Connection Connection;
 
 Connection * newConnection();
-Address * newAddress();
-
-Connection * connect(Address * addr);
-Address * listen(Address * addr);
-Connection * accept(Address * addressToAccept);
+Connection * comConnect(char * addr);
+char * comListen(char * addr);
+Connection * comAccept(char * addressToAccept);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
 void disconnect(Connection * connection);
+
+#endif

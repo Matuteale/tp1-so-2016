@@ -1,12 +1,6 @@
 #include "blackjacklib.h"
 #include "server.h"
-
-
-ServerData * newServerData() {
-    ServerData * serverData = malloc(sizeof(ServerData));
-    memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
-    return serverData;
-}
+#include <sys/types.h>
 
 int main() {
 
@@ -14,22 +8,31 @@ int main() {
 
     startServer();
 
-    Address * srv = newAddress();
-    strcpy(srv->path, SRV_PATH);
+    char * srv = malloc(sizeof(SRV_PATH));
+    strcpy(srv, SRV_PATH);
 
     while(1) {
         if (emptySpots(serverData) > 0) {
-            Address * listened = listen(srv);
+            char * listened = comListen(srv);
             if (listened != NULL) {
                 printf("Connection detected\n");
-                addClient(accept(listened), serverData);
-
+                addClient(comAccept(listened), serverData);
             }
         }
         checkConnections(serverData);
     }
 
     return 0;
+}
+
+ServerData * newServerData() {
+    ServerData * serverData = malloc(sizeof(ServerData));
+    memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
+    return serverData;
+}
+
+void deleteServerData(ServerData * serverData) {
+    free(serverData);
 }
 
 int startServer() {
@@ -69,7 +72,6 @@ int firstEmptySpot(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
-
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
@@ -87,7 +89,7 @@ int disconnectClient(int index, ServerData * serverData) {
 }
 
 int hasBeenDisconnected(int index, ServerData * serverData) {
-    if( access(serverData->clientTable[index]->output->path, F_OK ) != -1 ) {
+    if( access(serverData->clientTable[index]->output, F_OK ) != -1 ) {
         return 0;
     }
     return 1;

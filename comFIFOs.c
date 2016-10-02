@@ -1,34 +1,33 @@
 #include "com.h"
+#include "comFIFOs.h"
 #include "blackjacklib.h"
+
 
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
-    connection->input = newAddress();
-    connection->output = newAddress();
+    connection->input = malloc(MAX_BUF);
+    memset(connection->input, 0, MAX_BUF);
+    connection->output = malloc(MAX_BUF);
+    memset(connection->output, 0, MAX_BUF);
     return connection;
 }
 
-Address * newAddress() {
-    Address * address = malloc(sizeof(Address));
-    address->path = malloc(MAX_PATH);
-    return address;
-}
 
-Address * listen(Address * addr) {
+char * comListen(char * addr) {
 
     int inputAuxFD;
 
     char buffer[MAX_BUF];
 
-    inputAuxFD = open(addr->path, O_RDONLY | O_NONBLOCK);
+    inputAuxFD = open(addr, O_RDONLY | O_NONBLOCK);
 
     if (read(inputAuxFD, buffer, MAX_BUF) <= 0) {
         close(inputAuxFD);
         return NULL;
     }
 
-    Address * aux = newAddress();
-    strcpy(aux->path, buffer);
+    char * aux = malloc(MAX_BUF);
+    strcpy(aux, buffer);
 
     close(inputAuxFD);
 
@@ -36,31 +35,31 @@ Address * listen(Address * addr) {
 
 }
 
-Connection * accept(Address * addressToAccept) {
+Connection * comAccept(char * addressToAccept) {
 
     char buffer[MAX_BUF];
 
     Connection * connection = newConnection();
 
     /* Copying CLIENTIN FIFO PATH to Connection Output */
-    strcpy(connection->output->path, addressToAccept->path);
+    strcpy(connection->output, addressToAccept);
 
     /* Opening OUTPUT (CLIENTIN) FD */
-    connection->outputFD = open(connection->output->path, O_WRONLY);
+    connection->outputFD = open(connection->output, O_WRONLY);
 
     /* Creating CLIENTOUT FIFO PATH */
-    strncpy(connection->input->path, connection->output->path, indexOf(connection->output->path,'C'));
-    strcat(connection->input->path, "CLIENTOUT");
+    strncpy(connection->input, connection->output, indexOf(connection->output,'C'));
+    strcat(connection->input, "CLIENTOUT");
 
     /* Creating CLIENTOUT FIFO */
-    unlink(connection->input->path);
-    mkfifo(connection->input->path, 0666);
+    unlink(connection->input);
+    mkfifo(connection->input, 0666);
 
     /* Opening CLIENTOUT FD */
-    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
 
     /* Writing CLIENTOUT FIFO PATH to Client */
-    write(connection->outputFD, connection->input->path, MAX_BUF);
+    write(connection->outputFD, connection->input, MAX_BUF);
 
     //ACA IRIAN LOS CLOSE
  
@@ -73,14 +72,14 @@ Connection * accept(Address * addressToAccept) {
         printf("CONNECTED\n");
         return connection;
     } else {
-        unlink(connection->input->path);
+        unlink(connection->input);
     }
 
     return NULL;
 
 }
 
-Connection * connect(Address * addr) {
+Connection * comConnect(char * addr) {
 
     int outputAuxFD;
     char * auxPID;
@@ -95,22 +94,22 @@ Connection * connect(Address * addr) {
     sprintf(auxPID, "%d", getpid());
 
     /* Creating INPUT path */
-    strcpy(connection->input->path, addr->path);
-    strcat(connection->input->path, auxPID);
-    strcat(connection->input->path, "CLIENTIN");
+    strcpy(connection->input, addr);
+    strcat(connection->input, auxPID);
+    strcat(connection->input, "CLIENTIN");
 
     /* Creating INPUT Fifo */
-    unlink(connection->input->path);
-    mkfifo(connection->input->path, 0666);
+    unlink(connection->input);
+    mkfifo(connection->input, 0666);
 
     /* Opening AUX OUTPUT FD */
-    outputAuxFD = open(addr->path, O_WRONLY);
+    outputAuxFD = open(addr, O_WRONLY);
 
     /* Opening INPUT FD */
-    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
 
     /* Writing INPUT FIFO PATH to AUX OUTPUT FD, requesting a connection */
-    write(outputAuxFD, connection->input->path, MAX_BUF);
+    write(outputAuxFD, connection->input, MAX_BUF);
 
     /* Waiting for SRV response */
     while(read(connection->inputFD, buffer, MAX_BUF) <= 0);
@@ -119,8 +118,8 @@ Connection * connect(Address * addr) {
     close(outputAuxFD);
 
     /* Opening OUTPUT FD */
-    strcpy(connection->output->path, buffer);
-    connection->outputFD = open(connection->output->path, O_WRONLY);
+    strcpy(connection->output, buffer);
+    connection->outputFD = open(connection->output, O_WRONLY);
 
     /* Requesting SRV confirmation on successful connection */
     strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
@@ -132,7 +131,7 @@ Connection * connect(Address * addr) {
         printf("CONNECTED\n");
         return connection;
     } else {
-        unlink(connection->input->path);
+        unlink(connection->input);
     }
     
     return NULL;
@@ -140,13 +139,13 @@ Connection * connect(Address * addr) {
 
 int comWrite(Connection * connection, char * dataToWrite, int size) {
 
-    return write(connection->outputFD, dataToWrite, MAX_BUF);
+    return write(connection->outputFD, dataToWrite, size);
 
 }
 
 int comRead(Connection * connection, char * dataToRead, int size) {
 
-    return read(connection->inputFD, dataToRead, MAX_BUF);
+    return read(connection->inputFD, dataToRead, size);
 
 }
 
@@ -154,9 +153,7 @@ int comRead(Connection * connection, char * dataToRead, int size) {
 void disconnect(Connection * connection) {
     close(connection->inputFD);
     close(connection->outputFD);
-    unlink(connection->input->path);
-    free(connection->input->path);
-    free(connection->output->path);
+    unlink(connection->input);
     free(connection->input);
     free(connection->output);
     free(connection);
