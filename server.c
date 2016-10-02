@@ -88,7 +88,7 @@ int disconnectClient(int index, ServerData * serverData) {
     disconnect(serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 0;
     setUnActive(serverData->gameTable->playerSeats[index]);
-    updateClientsOnDisconnect(serverData, index);
+    //updateClientsOn(serverData, index, CLEARSEAT);
     printf("Client in spot %d disconnected.\n", index);
     return 1;
 }
@@ -182,13 +182,13 @@ void dealCardsToPlayers(ServerData * serverData) {
             if (hasBeenDisconnected(index, serverData)) {
                 disconnectClient(index, serverData);
             } else {
-                updateClientsOnActive(serverData, index);
+                //updateClientsOn(serverData, index, SETACTIVE);
                 while(serverData->gameTable->playerSeats[index]->score <= MAX_SCORE &&
                     requestPlay(serverData->clientTable[index]) == 'H') {
 
                     deal(serverData, index);
                 }
-                updateClientsOnUnActive(serverData, index);
+                //updateClientsOn(serverData, index, SETUNACTIVE);
             }
         }
     }
@@ -217,7 +217,7 @@ void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
     }
 }
 
-void updateClientsOnDisconnect(ServerData * serverData, int index) {
+void updateClientsOn(ServerData * serverData, int index, char action) {
 
     int i;
 
@@ -226,18 +226,9 @@ void updateClientsOnDisconnect(ServerData * serverData, int index) {
             if (hasBeenDisconnected(i, serverData)) {
                 disconnectClient(i, serverData);
             } else {
-                //sendAction(serverData->clientTable[index], CLEANSEAT);
+                //sendAction(serverData->clientTable[index], action);
                 //sendInt(index);
             }
         }
     }
-
-}
-
-void updateClientsOnActive(ServerData * serverData, int index) {
-
-}
-
-void updateClientsOnUnActive(ServerData * serverData, int index) {
-
 }
