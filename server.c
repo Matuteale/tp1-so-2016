@@ -10,7 +10,7 @@ ServerData * newServerData() {
 }
 
 int main() {
-
+    int i;
     ServerData * serverData = newServerData();
 
     startServer();
@@ -30,7 +30,7 @@ int main() {
 
             }
         }
-        for(int i = 0; i<MAX_PLAYERS; i++) {
+        for(i = 0; i<MAX_PLAYERS; i++) {
             if(serverData->connectedBoolean[i] != 0) {
                 //printf("%d\n", card);
                 //comWrite(serverData->clientTable[i], card, MAX_BUF);
@@ -45,7 +45,7 @@ int main() {
         }
         checkConnections(serverData);
     }
-
+    //TODO sighandler
     return 0;
 }
 
@@ -59,6 +59,7 @@ int startServer() {
     
     return 1;
 }
+
 
 int emptySpots(ServerData * serverData) {
     int i;
@@ -133,7 +134,7 @@ static void deal(Connection * connection) {
     
 }
 
-void dealWithOrder(char * buffer, Connection * connection) {
+/*void dealWithOrder(char * buffer, Connection * connection) {
         switch (buffer) {
 
         case 'h':
@@ -151,4 +152,4 @@ void dealWithOrder(char * buffer, Connection * connection) {
         default:
             break;
     }        
-}
+}*/

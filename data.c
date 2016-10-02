@@ -1,12 +1,12 @@
 #include "data.h"
 
-Data newData(int i) {
+char * newData(int i) {
 	char* buffer = malloc(MAX_BUF);
     memset(buffer, 0, MAX_BUF);
     snprintf(buffer, MAX_BUF, "%c%d\n", 'i',i);	
 }
 
-Data newData(char * c) {
+char * newData(char * c) {
 	char* buffer = malloc(MAX_BUF);
     memset(buffer, 0, MAX_BUF);
     snprintf(buffer, MAX_BUF, "%c%s\n", 's',c);	
