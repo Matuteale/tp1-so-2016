@@ -127,6 +127,7 @@ void bet(ClientData * clientData) {
                 /*if (sendInt(value)) {
                     valid = 1;
                 }*/
+                sendInt(clientData->serverConnection, value);
             }
         }
         if (!valid) {

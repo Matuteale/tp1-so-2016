@@ -3,6 +3,7 @@
 
 #include "com.h"
 #include "comFIFOs.h"
+#include "blackjacklib.h"
 
 typedef struct ClientData{
 	Connection * serverConnection;

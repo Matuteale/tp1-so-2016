@@ -21,6 +21,8 @@ int main() {
             }
         }
         checkConnections(serverData);
+        if (serverData->connectedBoolean[0] == 1)
+        printf("LLEGA: %d\n", requestInt(serverData->clientTable[0]));
     }
 
     return 0;

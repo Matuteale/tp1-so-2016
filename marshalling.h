@@ -1,6 +1,9 @@
 #ifndef MARSHALLING_H
 #define MARSHALLING_H
 
+#include "blackjacklib.h"
+#include "com.h"
+
 char * requestStr(Connection * connection); //BLOCKING
 int requestInt(Connection * connection); //BLOCKING
 Deal * requestDeal(Connection * connection); //BLOCKING
