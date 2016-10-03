@@ -2,6 +2,7 @@
 #define BLACKJACKLIB_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <math.h>
@@ -11,6 +12,7 @@
 
 #define CARDS_PER_DECK 52
 #define PLAYING_DECKS 6
+#define DECK_SIZE (CARDS_PER_DECK * PLAYING_DECKS)
 #define DECK_PENETRATION 0.8
 #define SUITS 4
 #define MAX_SCORE 21
@@ -27,6 +29,7 @@
 
 // MSGS CODES
 #define SUCCESS "1"
+#define FAIL "0"
 
 // ACTIONS
 #define BET 'A'
@@ -98,6 +101,9 @@ int getInt(int size);
 int charToInt(char c);
 int strToInt(char * str);
 void clearSTDIN();
+int randInt(int limitInclusive);
+void shuffle(void ** array, int size);
+void swap(void ** array, int i, int j);
 
 
 #endif

@@ -10,7 +10,7 @@ typedef struct ServerData{
 	Connection * clientTable[MAX_PLAYERS];
     int connectedBoolean[MAX_PLAYERS];
     Table * gameTable;
-    Card * deck[CARDS_PER_DECK * PLAYING_DECKS];
+    Card * deck[DECK_SIZE];
     int deckIndex;
     int balance[MAX_PLAYERS];
 }ServerData;

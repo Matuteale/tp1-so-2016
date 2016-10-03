@@ -11,6 +11,7 @@ int main() {
     startServer(serverData);
 
     generateDeck(serverData);
+    shuffleDeck(serverData);
 
     while(1) {
         checkCurrentConnections(serverData);
@@ -113,7 +114,7 @@ int hasBeenDisconnected(int index, ServerData * serverData) {
 
 void checkCurrentConnections(ServerData * serverData) {
     int i;
-    for (i = 0; i < MAX_PLAYERS; i++) {
+    for (i = 0; i < emptySpots(serverData); i++) {
         if (serverData->connectedBoolean[i] == 1) {
             if (hasBeenDisconnected(i, serverData)) {
                 disconnectClient(i, serverData);
@@ -147,7 +148,9 @@ void generateDeck(ServerData * serverData) {
 }
 
 void shuffleDeck(ServerData * serverData) {
-    //TIENE QUE PONER EL DECKINDEX EN 0!
+    serverData->deckIndex = 0;
+    updateClientsOn(serverData, SHUFFLE);
+    shuffle(serverData->deck, DECK_SIZE);
 }
 
 int requestBetTo(ServerData * serverData, int index) {
@@ -159,6 +162,8 @@ int requestBetTo(ServerData * serverData, int index) {
         if (isBetValid(serverData, index, bet)) {
             valid = 1;
             sendStr(serverData->clientTable[index], SUCCESS);
+        } else {
+            sendStr(serverData->clientTable[index], FAIL);
         }
     }
 
@@ -337,10 +342,10 @@ void payWinners(ServerData * serverData) {
 }
 
 int hasWon(Seat * seat, int croupierScore) {
-    if (seat->score > 21) {
+    if (seat->score > MAX_SCORE) {
         return 0;
     }
-    if (seat->score < croupierScore) {
+    if (seat->score < croupierScore && croupierScore <= MAX_SCORE ) {
         return 0;
     }
     return 1;
@@ -374,7 +379,6 @@ void startRound(ServerData * serverData) {
     if (MAX_PLAYERS - emptySpots(serverData) > 0) {
         if (hasDeckReachedLimit(serverData->deckIndex)) {
             clearTable(serverData->gameTable);
-            updateClientsOn(serverData, SHUFFLE);
             shuffleDeck(serverData);
         } else {
             clearTable(serverData->gameTable);

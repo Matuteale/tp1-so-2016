@@ -143,7 +143,7 @@ void setUnActive(Seat * seat) {
 }
 
 int hasDeckReachedLimit(int deckIndex) {
-	return ( (((double)deckIndex) / ((double)(CARDS_PER_DECK * PLAYING_DECKS)))
+	return ( (((double)deckIndex) / ((double)(DECK_SIZE)))
 		> ((double)(DECK_PENETRATION)) );
 }
 
@@ -278,4 +278,26 @@ int strToInt(char * str) {
 
 void clearSTDIN() {
 	while(getchar() != '\n');
+}
+
+int randInt(int limitInclusive) {
+
+	srand(clock());
+	int r = rand() % limitInclusive;
+	return r;
+}
+
+void shuffle(void ** array, int size) {
+	int i;
+	int random;
+	for (i = 0; i < size; i++) {
+		random = randInt(size);
+		swap(array, i, random);
+	}
+}
+
+void swap(void ** array, int i, int j) {
+	void * aux = array[i];
+	array[i] = array[j];
+	array[j] = aux;
 }

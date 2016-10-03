@@ -57,7 +57,7 @@ void waitForServer(ClientData * clientData) {
     printf("Waiting for turn...\n");
 
     char c = requestChar(clientData->serverConnection);
-    printf("ACTION SENT: %c\n", c);
+    //DEBUG printf("ACTION SENT: %c\n", c);
     switch(c) {
         case BET: {
             bet(clientData);
@@ -117,13 +117,10 @@ void bet(ClientData * clientData) {
             }
 
             int value = strToInt(str);
-            printf("convierte a int %d\n", value);
             free(str);
             if (value != NULL && value > 0) {
-                printf("ENVIANDO: %d\n", value);
                 sendInt(clientData->serverConnection, value);
                 if (strcmp(requestStr(clientData->serverConnection), SUCCESS) == 0) {
-                    printf("YESSSSSSSSSSSSSSSSS\n");
                     valid = 1;
                 }
             }
