@@ -61,6 +61,11 @@ typedef struct Deal{
 	int playerNumber;
 }Deal;
 
+typedef struct Bet{
+	int bet;
+	int playerNumber;
+}Bet;
+
 Card * newCard(char figure);
 Seat * newSeat();
 Table * newTable();

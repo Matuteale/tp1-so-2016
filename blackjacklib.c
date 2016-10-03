@@ -148,7 +148,7 @@ void showTable(Table * table) {
 	printf("Cards:   ");
 
 	for(i = 0; i < crSeat->handSize; i++) {
-		printf("%c ", crSeat->hand[i]->figure);
+		printf("%c%c ", crSeat->hand[i]->figure == '0' ? '1' : 0, crSeat->hand[i]->figure);
 	}
 	printf("SCORE: %d  ", crSeat->score);
 	printf("\n\n\n");
@@ -160,7 +160,7 @@ void showTable(Table * table) {
 		printf("Player %d\n", j);
 		printf("Cards:   ");
 		for(i = 0; i < seat->handSize; i++) {
-			printf("%c ", seat->hand[i]->figure);
+			printf("%c%c ", seat->hand[i]->figure == '0' ? '1' : 0, seat->hand[i]->figure);
 		}
 		printf("SCORE: %d  ", seat->score);
 		printf("BET: %d  ", seat->currentBet);

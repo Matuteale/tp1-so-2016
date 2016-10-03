@@ -107,6 +107,7 @@ void bet(ClientData * clientData) {
         if (str != NULL) {
             if(str[0] == 'q' && str[1] == '\0' ) {
                 free(str);
+                sendInt(clientData->serverConnection, 0);
                 disconnectClient(clientData);
             }
 
