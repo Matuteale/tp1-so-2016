@@ -57,7 +57,7 @@ void waitForServer(ClientData * clientData) {
     printf("Waiting for turn...\n");
 
     char c = requestChar(clientData->serverConnection);
-
+    printf("ACTION SENT: %c\n", c);
     switch(c) {
         case BET: {
             bet(clientData);
@@ -71,8 +71,8 @@ void waitForServer(ClientData * clientData) {
             deal(clientData);
             break;
         }
-        case CLEARSEAT: {
-            clearSeatAction(clientData);
+        case CLEARTABLE: {
+            clearTableAction(clientData);
             break;
         }
         case SHUFFLE: {
@@ -95,13 +95,13 @@ void waitForServer(ClientData * clientData) {
 
 void bet(ClientData * clientData) {
 
-    struct timeval start, stop;
-    gettimeofday(&start, NULL);
+    //struct timeval start, stop;
+    //gettimeofday(&start, NULL);
 
     int valid = 0;
 
     while(!valid) {
-        //printf("Your Balance: %d\n", clientData->balance);
+        printf("Your Balance: %d\n", clientData->balance);
         printf("Place your bet: (or type 'q' to quit)\n");
         char * str = getStr(MAX_DIGITS);
         if (str != NULL) {
@@ -111,7 +111,7 @@ void bet(ClientData * clientData) {
             }
 
             int value = strToInt(str);
-            printf("LLEGUE HASTA ACA ESCRIBI %s EQUIVALE AL INT %d\n",str, value);
+            printf("convierte a int %d\n", value);
             free(str);
             if (value != NULL && value > 0) {
                 printf("ENVIANDO: %d\n", value);
@@ -130,22 +130,20 @@ void bet(ClientData * clientData) {
 
 void play(ClientData * clientData) {
 
-    char * ans = NULL;
-    while(strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0) {
+    char * ans;
+    do {
         printf("Enter an action:  'H' | HIT -- 'S' | STAND\n");
         ans = getStr(1);
-    }
+    } while(strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0);
 
     sendStr(clientData->serverConnection, ans);
 }
 
 void deal(ClientData * clientData) {
 
-    //Deal * deal = requestDeal(clientData->serverConnection);
-
-    //addCardToSeat(newCard(deal->card), clientData->gameTable->seats[deal->playerNumber]);
-
-    //deleteDeal(deal);
+    Deal * deal = requestDeal(clientData->serverConnection);
+    addCardToSeat(newCard(deal->card), clientData->gameTable->seats[deal->playerNumber]);
+    deleteDeal(deal);
 }
 
 void clearSeatAction(ClientData * clientData) {

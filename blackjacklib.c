@@ -76,14 +76,9 @@ int getCardValue(char figure) {
 	}
 }
 
-int getScore(Card ** hand, int handSize) {
-	//TODO
-	return 0;
-}
-
 void clearSeat(Seat * seat) {
 	int i;
-	for(i = 0; i < MAX_CARDSINHAND; i++ ) {
+	for(i = 0; i < seat->handSize; i++ ) {
 		deleteCard(seat->hand[i]);
 	}
 	seat->handSize = 0;
@@ -111,10 +106,10 @@ void calculateScore(Seat * seat) {
 	for (i = 0; i < seat->handSize; i++) {
 		aux+= seat->hand[i]->value;
 	}
-	if (aux + 10 > 21) {
-		seat->score = aux;
-	} else if(hasAce(seat)) {
+	if (hasAce(seat) && aux + 10 <= 21) {
 		seat->score = aux + 10;
+	}else {
+		seat->score = aux;
 	}
 }
 
@@ -153,7 +148,7 @@ void showTable(Table * table) {
 	printf("Cards:   ");
 
 	for(i = 0; i < crSeat->handSize; i++) {
-		printf("%c ", crSeat->hand[i]);
+		printf("%c ", crSeat->hand[i]->figure);
 	}
 	printf("SCORE: %d  ", crSeat->score);
 	printf("\n\n\n");
@@ -165,7 +160,7 @@ void showTable(Table * table) {
 		printf("Player %d\n", j);
 		printf("Cards:   ");
 		for(i = 0; i < seat->handSize; i++) {
-			printf("%c ", seat->hand[i]);
+			printf("%c ", seat->hand[i]->figure);
 		}
 		printf("SCORE: %d  ", seat->score);
 		printf("BET: %d  ", seat->currentBet);
@@ -253,7 +248,7 @@ int strToInt(char * str) {
 	int j = 1;
 	int aux = 0;
 
-	if (i <= 0 || i > MAX_DIGITS) {
+	if (i < 0 || i > MAX_DIGITS) {
 		return -1;
 	}
 

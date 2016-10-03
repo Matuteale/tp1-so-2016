@@ -10,6 +10,8 @@ int main() {
 
     startServer(serverData);
 
+    generateDeck(serverData);
+
     while(1) {
         checkCurrentConnections(serverData);
         checkIncomingConnections(serverData);
@@ -97,7 +99,7 @@ int disconnectClient(int index, ServerData * serverData) {
     disconnect(serverData->clientTable[index]);
     serverData->connectedBoolean[index] = 0;
     clearSeat(serverData->gameTable->seats[index]);
-    updateClientsOn(serverData, index, CLEARSEAT);
+    updateClientsOnIndex(serverData, index, CLEARSEAT);
     printf("Client in spot %d disconnected.\n", index);
     return 1;
 }
@@ -133,9 +135,10 @@ void generateDeck(ServerData * serverData) {
     for(k = 0; k < PLAYING_DECKS; k++) {
         for (i = 0; i < SUITS; i++) {
             serverData->deck[deckIndex++] = newCard('A');
-            for (j = 2; j <= 10; j++) {
+            for (j = 2; j <= 9; j++) {
                 serverData->deck[deckIndex++] = newCard(j + '0');
             }
+            serverData->deck[deckIndex++] = newCard('0'); //ESTOS SON LOS 10
             serverData->deck[deckIndex++] = newCard('J');
             serverData->deck[deckIndex++] = newCard('Q');
             serverData->deck[deckIndex++] = newCard('K');
@@ -144,7 +147,7 @@ void generateDeck(ServerData * serverData) {
 }
 
 void shuffleDeck(ServerData * serverData) {
-
+    //TIENE QUE PONER EL DECKINDEX EN 0!
 }
 
 int requestBet(ServerData * serverData, int index) {
@@ -173,7 +176,7 @@ void requestBetToPlayers(ServerData * serverData) {
             if (hasBeenDisconnected(index, serverData)) {
                 disconnectClient(index, serverData);
             } else {
-                updateClientsOn(serverData, index, SETACTIVE);
+                updateClientsOnIndex(serverData, index, SETACTIVE);
                 int bet = requestBet(serverData, index);
                 if (bet <= 0) {
                     disconnectClient(index, serverData);
@@ -181,7 +184,7 @@ void requestBetToPlayers(ServerData * serverData) {
                     serverData->balance[index] -= bet;
                     updateBalance(serverData, index);
                 }
-                updateClientsOn(serverData, index, SETUNACTIVE);
+                updateClientsOnIndex(serverData, index, SETUNACTIVE);
             }
         }
     }
@@ -226,13 +229,13 @@ void askPlayerForHit(ServerData * serverData) {
             if (hasBeenDisconnected(index, serverData)) {
                 disconnectClient(index, serverData);
             } else {
-                updateClientsOn(serverData, index, SETACTIVE);
+                updateClientsOnIndex(serverData, index, SETACTIVE);
                 while(serverData->gameTable->seats[index]->score <= MAX_SCORE &&
                     requestPlay(serverData->clientTable[index]) == 'H') {
 
                     deal(serverData, index);
                 }
-                updateClientsOn(serverData, index, SETUNACTIVE);
+                updateClientsOnIndex(serverData, index, SETUNACTIVE);
             }
         }
     }
@@ -243,6 +246,7 @@ void deal(ServerData * serverData, int index) {
     addCardToSeat(card, serverData->gameTable->seats[index]);
     Deal * deal = newDeal(card->figure, index);
     updateClientsOnDeal(serverData, deal);
+    deleteDeal(deal);
 }
 
 void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
@@ -255,13 +259,13 @@ void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
                 disconnectClient(index, serverData);
             } else {
                 sendChar(serverData->clientTable[index], DEAL);
-                //sendDeal(serverData->clientTable[index], deal);
+                sendDeal(serverData->clientTable[index], deal);
             }
         }
     }
 }
 
-void updateClientsOnShuffle(ServerData * serverData) {
+void updateClientsOn(ServerData * serverData, char action) {
 
     int i;
 
@@ -270,13 +274,13 @@ void updateClientsOnShuffle(ServerData * serverData) {
             if (hasBeenDisconnected(i, serverData)) {
                 disconnectClient(i, serverData);
             } else {
-                sendChar(serverData->clientTable[i], SHUFFLE);
+                sendChar(serverData->clientTable[i], action);
             }
         }
     }
 }
 
-void updateClientsOn(ServerData * serverData, int index, char action) {
+void updateClientsOnIndex(ServerData * serverData, int index, char action) {
 
     int i;
 
@@ -330,17 +334,19 @@ void dealInitialCards(ServerData * serverData) {
     int j;
     for (j = 0; j < 2; j++) {
         for (i = 0; i < MAX_PLAYERS; i++) {
+            if (serverData->connectedBoolean[i] == 1) {
             deal(serverData, i);
+            }
         }
     }
 }
 
 void croupierPlay(ServerData * serverData) {
-    updateClientsOn(serverData, CROUPIER_SEAT, SETACTIVE);
+    updateClientsOnIndex(serverData, CROUPIER_SEAT, SETACTIVE);
     while(serverData->gameTable->seats[CROUPIER_SEAT]->score < 17) {
         deal(serverData, CROUPIER_SEAT);
     }
-    updateClientsOn(serverData, CROUPIER_SEAT, SETUNACTIVE);
+    updateClientsOnIndex(serverData, CROUPIER_SEAT, SETUNACTIVE);
 
 }
 
@@ -348,8 +354,10 @@ void startRound(ServerData * serverData) {
     if (MAX_PLAYERS - emptySpots(serverData) > 0) {
         if (hasDeckReachedLimit(serverData->deckIndex)) {
             clearTable(serverData->gameTable);
-            updateClientsOnShuffle(serverData);
+            updateClientsOn(serverData, SHUFFLE);
             shuffleDeck(serverData);
+        } else {
+            updateClientsOn(serverData, CLEARTABLE);
         }
         requestBetToPlayers(serverData);
         dealInitialCards(serverData);

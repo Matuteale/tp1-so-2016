@@ -7,6 +7,8 @@
 #include <math.h>
 #include <limits.h>
 
+#define CLOCK 100000
+
 #define CARDS_PER_DECK 52
 #define PLAYING_DECKS 6
 #define DECK_PENETRATION 0.8
@@ -69,7 +71,6 @@ void deleteSeat(Seat * seat);
 void deleteTable(Table * table);
 void deleteDeal(Deal * deal);
 int getCardValue(char figure);
-int getScore(Card ** hand, int handSize);
 void clearSeat(Seat * seat);
 void clearTable(Table * table);
 void addCardToSeat(Card * card, Seat * seat);

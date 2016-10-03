@@ -1,10 +1,9 @@
 #include "marshalling.h"
-#include "comFIFOs.h" //TODO: REMOVER, ES SOLO PARA TEST
+//DEBUG #include "comFIFOs.h" //TODO: REMOVER, ES SOLO PARA TEST
 char requestChar(Connection * connection) {
 
 	char c;
 
-	printf("ESPERANDO CHAR\n");
 	char * aux = requestStr(connection);
 
 	c = aux[0];
@@ -17,9 +16,9 @@ char requestChar(Connection * connection) {
 char * requestStr(Connection * connection) {
 
 	char * str = malloc(sizeof(char) * MAX_BUF);
-	printf("ESPERANDO STR DE %s FD %d\n", connection->input, connection->inputFD);
+	//DEBUG printf("ESPERANDO STR DE %s FD %d\n", connection->input, connection->inputFD);
 	comRead(connection, str, MAX_BUF);
-	printf("STRING RECIBIDO %s\n", str);
+	//DEBUG printf("STRING RECIBIDO %s\n", str);
 	str = realloc(str, strlen(str) * sizeof(char));
 
 	return str;
@@ -29,41 +28,43 @@ int requestInt(Connection * connection) {
 
 	char * buf = malloc(sizeof(int)+1);
 	int ans = 0;
-	printf("ESPERANDO INT DE %s FD %d\n", connection->input, connection->inputFD);
+	//DEBUG printf("ESPERANDO INT DE %s FD %d\n", connection->input, connection->inputFD);
 	comRead(connection, buf, sizeof(int)+1);
-
 	memcpy(&ans, buf, sizeof(int));
-	printf("INT RECIBIDO %d\n", ans);
+	//DEBUG printf("INT RECIBIDO %d\n", ans);
 	free(buf);
 
 	return ans;
 }
 
 Deal * requestDeal(Connection * connection) {
-
+	char c = requestChar(connection);
+	int i = requestInt(connection);
+	Deal * deal = newDeal(c, i);
+	return deal;
 }
 
 void sendStr(Connection * connection, char * str) {
-	
-	printf("ENVIANDO STR %s A %s FD %d\n", str, connection->output, connection->outputFD);
+	usleep(CLOCK);
+	//DEBUG printf("ENVIANDO STR %s A %s FD %d\n", str, connection->output, connection->outputFD);
 	comWrite(connection, str, strlen(str));
 }
 
 void sendInt(Connection * connection, int integer) {
-	
+	usleep(CLOCK);
 	char * buf = malloc(sizeof(int)+1);
 
 	clearBuffer(buf, sizeof(int)+1);
 
 	memcpy(buf, &integer, sizeof(int));
-printf("ENVIANDO INT %d A %s FD %d\n", integer, connection->output, connection->outputFD);
+	//DEBUG printf("ENVIANDO INT %d A %s FD %d\n", integer, connection->output, connection->outputFD);
 	comWrite(connection, buf, sizeof(int)+1);
 
 	free(buf);
 }
 
 void sendChar(Connection * connection, char action) {
-
+	
     char * str = malloc(2*sizeof(char));
 
     str[0] = action;
@@ -75,5 +76,6 @@ void sendChar(Connection * connection, char action) {
 }
 
 void sendDeal(Connection * connection, Deal * deal) {
-
+	sendChar(connection, deal->card);
+	sendInt(connection, deal->playerNumber);
 }

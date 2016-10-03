@@ -124,7 +124,7 @@ Connection * comConnect(char * addr) {
     /* Requesting SRV confirmation on successful connection */
     strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
     comWrite(connection, buffer, MAX_BUF);
-    
+
     /* Waiting for SRV response */ //TODO: FIX WARNINGS, SHOULD COMPARE BYTES.
     comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
@@ -139,37 +139,17 @@ Connection * comConnect(char * addr) {
 
 int comWrite(Connection * connection, char * dataToWrite, int size) {
 
-    char * buf = malloc(MAX_BUF);
-
-    clearBuffer(buf, MAX_BUF);
-
-    while(strcmp(buf, SUCCESS) != 0) {
-        clearBuffer(buf, MAX_BUF);
-        read(connection->inputFD, buf, sizeof(SUCCESS) +1);
-    }
-
-    free(buf);
-
     return write(connection->outputFD, dataToWrite, size);
 
 }
 
 int comRead(Connection * connection, char * dataToRead, int size) {
 
-    char * buf = malloc(MAX_BUF);
-
-    strcpy(buf, SUCCESS);
-
-    write(connection->outputFD, buf, sizeof(SUCCESS)+1);
-
-    free(buf);
-
     int ret;
 
     while(ret = read(connection->inputFD, dataToRead, size) <= 0);
-
+    
     return ret;
-
 }
 
 //TODO: Decidir si hacemos que retorne int segun si desconecta correctamente o lo dejamos asi
