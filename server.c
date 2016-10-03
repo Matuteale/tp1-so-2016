@@ -288,7 +288,9 @@ void updateClientsOn(ServerData * serverData, int index, char action) {
             if (hasBeenDisconnected(i, serverData)) {
                 disconnectClient(i, serverData);
             } else {
+                printf("SENDING CHAR %c TO INDEX %d\n", action, i);
                 sendChar(serverData->clientTable[i], action);
+                printf("SENDING INT %d\n", index);
                 sendInt(serverData->clientTable[i], index);
             }
         }
