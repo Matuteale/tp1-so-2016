@@ -22,8 +22,9 @@ void play(ClientData * clientData);
 void deal(ClientData * clientData);
 void clearSeatAction(ClientData * clientData);
 void clearTableAction(ClientData * clientData);
-void shuffleAction();
+void shuffleAction(ClientData * clientData);
 void setActiveAction(ClientData * clientData);
 void setUnActiveAction(ClientData * clientData);
+void updateBalance(ClientData * clientData);
 
 #endif

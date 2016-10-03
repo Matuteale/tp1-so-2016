@@ -1,5 +1,20 @@
 #include "marshalling.h"
 
+char requestChar(Connection * connection) {
+
+	char c;
+
+	char * str = malloc(sizeof(char) * MAX_BUF);
+
+	while(comRead(connection, str, MAX_BUF) <= 0);
+
+	c = str[0];
+
+	free(str);
+
+	return c;
+}
+
 char * requestStr(Connection * connection) {
 
 	char * str = malloc(sizeof(char) * MAX_BUF);
@@ -45,6 +60,18 @@ void sendInt(Connection * connection, int integer) {
 	comWrite(connection, buf, sizeof(int)+1);
 
 	free(buf);
+}
+
+void sendChar(Connection * connection, char action) {
+
+    char * str = malloc(2*sizeof(char));
+
+    str[0] = action;
+    str[1] = '\0';
+
+    sendStr(connection, str);
+
+    free(str);
 }
 
 void sendDeal(Connection * connection, Deal * deal) {

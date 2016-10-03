@@ -21,9 +21,21 @@
 #define MAX_PLAYERS 8
 #define MAX_CARDSINHAND 22
 #define MAX_DIGITS floor(log10(abs(INT_MAX)))
+#define CROUPIER_SEAT MAX_PLAYERS+1
 
 // MSGS CODES
 #define SUCCESS "1"
+
+// ACTIONS
+#define BET 'A'
+#define PLAY 'B'
+#define DEAL 'C'
+#define CLEARSEAT 'D'
+#define CLEARTABLE 'E'
+#define SHUFFLE 'F'
+#define SETACTIVE 'G'
+#define SETUNACTIVE 'H'
+#define UPDATEBALANCE 'I'
 
 typedef struct Card{
 	char figure;
@@ -39,8 +51,7 @@ typedef struct Seat{
 }Seat;
 
 typedef struct Table{
-	Seat * croupierSeat;
-	Seat * playerSeats[MAX_PLAYERS];
+	Seat * seats[MAX_PLAYERS];
 }Table;
 
 typedef struct Deal{
@@ -66,6 +77,7 @@ void calculateScore(Seat * seat);
 int hasAce(Seat * seat);
 void setActive(Seat * seat);
 void setUnActive(Seat * seat);
+int hasDeckReachedLimit(int deckIndex);
 
 // Utilities -----------------------------------------------------------------------------------
 void clearBuffer(char * buffer, int size);

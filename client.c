@@ -10,6 +10,7 @@ int main() {
     strcpy(srvaddr, SRV_PATH);
     clientData->serverConnection = comConnect(srvaddr);
     clientData->gameTable = newTable();
+    clientData->balance = STARTING_MONEY;
 
     while(1) {
         bet(clientData);
@@ -57,56 +58,47 @@ void disconnectClient(ClientData * clientData) {
 
 void waitForServer(ClientData * clientData) {
 
-    char * buffer;
+    char c = requestChar(clientData->serverConnection);
 
-    buffer = malloc(sizeof(char) * MAX_BUF);
-
-    while(comRead(clientData->serverConnection, buffer,MAX_BUF)<= 0);
-
-    switch(buffer[0]) {
-        case 'A': {
+    switch(c) {
+        case BET: {
             bet(clientData);
             break;
         }
-        case 'B': {
+        case PLAY: {
             play(clientData);
             break;
         }
-        case 'C': {
+        case DEAL: {
             deal(clientData);
             break;
         }
-        case 'D': {
+        case CLEARSEAT: {
             clearSeatAction(clientData);
             break;
         }
-        case 'E': {
-            clearTableAction(clientData);
+        case SHUFFLE: {
+            shuffleAction(clientData);
             break;
         }
-        case 'F': {
-            shuffleAction();
-            break;
-        }
-        case 'G': {
+        case SETACTIVE: {
             setActiveAction(clientData);
             break;
         }
-        case 'H': {
+        case SETUNACTIVE: {
             setUnActiveAction(clientData);
             break;
         }
+        case UPDATEBALANCE: {
+            updateBalance(clientData);
+        }
     }
-
-    free(buffer);
 }
 
 void bet(ClientData * clientData) {
 
     struct timeval start, stop;
     gettimeofday(&start, NULL);
-
-    //updateBalance(clientData);
 
     int valid = 0;
 
@@ -145,23 +137,23 @@ void play(ClientData * clientData) {
         ans = getStr(1);
     }
 
-    //sendStr(ans);
+    sendStr(clientData->serverConnection, ans);
 }
 
 void deal(ClientData * clientData) {
 
     //Deal * deal = requestDeal(clientData->serverConnection);
 
-    //addCardToSeat(newCard(deal->card), clientData->gameTable->playerSeats[deal->playerNumber]);
+    //addCardToSeat(newCard(deal->card), clientData->gameTable->seats[deal->playerNumber]);
 
     //deleteDeal(deal);
 }
 
 void clearSeatAction(ClientData * clientData) {
 
-    //int playerNumber = requestInt(clientData->serverConnection);
+    int playerNumber = requestInt(clientData->serverConnection);
 
-    //clearSeat(clientData->playerSeats[playerNumber]);
+    clearSeat(clientData->gameTable->seats[playerNumber]);
 }
 
 void clearTableAction(ClientData * clientData) {
@@ -169,23 +161,30 @@ void clearTableAction(ClientData * clientData) {
     clearTable(clientData->gameTable);
 }
 
-void shuffleAction() {
+void shuffleAction(ClientData * clientData) {
 
     printf("Deck is being Shuffled ...");
+
+    clearTableAction(clientData);
 
     //TODO: VER SI AGREGAR UN WAIT DE 3 SEGUNDOS ROMPE ALGO. ES SOLO ESTETICO.
 }
 
 void setActiveAction(ClientData * clientData) {
 
-    //int playerNumber = requestInt(clientData->serverConnection);
+    int playerNumber = requestInt(clientData->serverConnection);
 
-    //setActive(clientData->gameTable->playerSeats[playerNumber]);
+    setActive(clientData->gameTable->seats[playerNumber]);
 }
 
 void setUnActiveAction(ClientData * clientData) {
 
-    //int playerNumber = requestInt(clientData->serverConnection);
+    int playerNumber = requestInt(clientData->serverConnection);
 
-    //setUnActive(clientData->gameTable->playerSeats[playerNumber]);
+    setUnActive(clientData->gameTable->seats[playerNumber]);
+}
+
+void updateBalance(ClientData * clientData) {
+
+    clientData->balance = requestInt(clientData->serverConnection);
 }

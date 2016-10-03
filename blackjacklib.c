@@ -14,9 +14,8 @@ Seat * newSeat() {
 Table * newTable() {
 	int i;
 	Table * aux = malloc(sizeof(Table));
-	aux->croupierSeat = newSeat();
-	for(i = 0; i < MAX_PLAYERS; i++) {
-		aux->playerSeats[i] = newSeat();
+	for(i = 0; i < MAX_PLAYERS + 1; i++) {
+		aux->seats[i] = newSeat();
 	}
 }
 
@@ -37,9 +36,8 @@ void deleteSeat(Seat * seat) {
 
 void deleteTable(Table * table) {
 	int i;
-	deleteSeat(table->croupierSeat);
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		deleteSeat(table->playerSeats[i]);
+	for (i = 0; i < MAX_PLAYERS+1; i++) {
+		deleteSeat(table->seats[i]);
 	}
 	free(table);
 }
@@ -85,13 +83,16 @@ void clearSeat(Seat * seat) {
 	for(i = 0; i < MAX_CARDSINHAND; i++ ) {
 		deleteCard(seat->hand[i]);
 	}
+	seat->handSize = 0;
+	seat->score = 0;
+	seat->currentBet = 0;
+	seat->isActive = 0;
 }
 
 void clearTable(Table * table) {
 	int i;
-	clearSeat(table->croupierSeat);
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		clearSeat(table->playerSeats[i]);
+	for (i = 0; i < MAX_PLAYERS+1; i++) {
+		clearSeat(table->seats[i]);
 	}
 }
 
@@ -130,6 +131,11 @@ void setActive(Seat * seat) {
 
 void setUnActive(Seat * seat) {
 	seat->isActive = 0;
+}
+
+int hasDeckReachedLimit(int deckIndex) {
+	return ( (((double)deckIndex) / ((double)(CARDS_PER_DECK * PLAYING_DECKS)))
+		< (1 - DECK_PENETRATION) );
 }
 
 //Utilities  -----------------------------------------------------------------------------------
