@@ -301,3 +301,29 @@ void swap(void ** array, int i, int j) {
 	array[i] = array[j];
 	array[j] = aux;
 }
+
+char * readStrFromFile(char * fileName) {
+
+    FILE * file = fopen(fileName, "r");
+    char * str;
+    int n = 0;
+    int c;
+
+    if (file == NULL) {
+    	fprintf(stderr, "ERROR reading file.\n");
+    	return NULL;
+    }
+
+    str = malloc(MAX_BUF);
+
+    while ((c = fgetc(file)) != EOF)
+    {
+        str[n++] = (char) c;
+    }
+
+    str[n] = '\0';
+
+    realloc(str, strlen(str)+1);
+
+    return str;
+}

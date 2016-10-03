@@ -104,6 +104,7 @@ void clearSTDIN();
 int randInt(int limitInclusive);
 void shuffle(void ** array, int size);
 void swap(void ** array, int i, int j);
+char * readStrFromFile(char * fileName);
 
 
 #endif

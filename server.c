@@ -6,7 +6,7 @@ int main() {
 
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
-    strcpy(serverData->srvpath, SRV_PATH);
+    serverData->srvpath = readStrFromFile("SERVERPATH.txt");
 
     startServer(serverData);
 
@@ -24,7 +24,7 @@ int main() {
 
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
-    serverData->srvpath = malloc(sizeof(SRV_PATH));
+    serverData->srvpath = malloc(MAX_PATH);
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
     return serverData;
 }
@@ -39,10 +39,10 @@ void deleteServerData(ServerData * serverData) {
 int startServer(ServerData * serverData) {
 
     /* Creating SRV FIFO */
-    unlink(SRV_PATH);
-    mkfifo(SRV_PATH, 0666);
+    unlink(serverData->srvpath);
+    mkfifo(serverData->srvpath, 0666);
 
-    open(SRV_PATH, O_RDONLY | O_NONBLOCK);
+    open(serverData->srvpath, O_RDONLY | O_NONBLOCK);
     
     return 1;
 }
@@ -389,6 +389,6 @@ void startRound(ServerData * serverData) {
         askPlayerForHit(serverData);
         croupierPlay(serverData);
         payWinners(serverData);
-        sleep(6); //ES ESTETICO PARA QUE LOS CLIENTES PUEDAN VER COMO TERMINO LA RONDA
+        sleep(3); //ES ESTETICO PARA QUE LOS CLIENTES PUEDAN VER COMO TERMINO LA RONDA
     }
 }
