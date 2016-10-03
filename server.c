@@ -150,7 +150,7 @@ void shuffleDeck(ServerData * serverData) {
     //TIENE QUE PONER EL DECKINDEX EN 0!
 }
 
-int requestBet(ServerData * serverData, int index) {
+int requestBetTo(ServerData * serverData, int index) {
     int valid = 0;
     int bet;
     sendChar(serverData->clientTable[index], BET);
@@ -177,12 +177,15 @@ void requestBetToPlayers(ServerData * serverData) {
                 disconnectClient(index, serverData);
             } else {
                 updateClientsOnIndex(serverData, index, SETACTIVE);
-                int bet = requestBet(serverData, index);
+                int bet = requestBetTo(serverData, index);
                 if (bet <= 0) {
                     disconnectClient(index, serverData);
                 } else {
                     serverData->balance[index] -= bet;
                     serverData->gameTable->seats[index]->currentBet = bet;
+                    Bet * aux = newBet(bet,index);
+                    updateClientsOnBet(serverData, aux);
+                    deleteBet(aux);
                     updateBalance(serverData, index);
                 }
                 updateClientsOnIndex(serverData, index, SETUNACTIVE);
@@ -261,6 +264,22 @@ void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
             } else {
                 sendChar(serverData->clientTable[index], DEAL);
                 sendDeal(serverData->clientTable[index], deal);
+            }
+        }
+    }
+}
+
+void updateClientsOnBet(ServerData * serverData, Bet * bet) {
+
+    int index;
+
+    for(index = 0; index < MAX_PLAYERS; index++) {
+        if (serverData->connectedBoolean[index] == 1) {
+            if (hasBeenDisconnected(index, serverData)) {
+                disconnectClient(index, serverData);
+            } else {
+                sendChar(serverData->clientTable[index], UPDATEBET);
+                sendDeal(serverData->clientTable[index], bet);
             }
         }
     }

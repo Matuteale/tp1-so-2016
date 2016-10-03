@@ -33,7 +33,7 @@ void checkCurrentConnections(ServerData * serverData);
 
 void generateDeck(ServerData * serverData);
 void shuffleDeck(ServerData * serverData);
-int requestBet(ServerData * serverData, int index);
+int requestBetTo(ServerData * serverData, int index);
 void requestBetToPlayers(ServerData * serverData);
 int isBetValid(ServerData * serverData, int index, int bet);
 void updateBalance(ServerData * serverData, int index);
@@ -41,6 +41,7 @@ char requestPlay(Connection * Connection);
 void askPlayerForHit(ServerData * serverData);
 void deal(ServerData * serverData, int index);
 void updateClientsOnDeal(ServerData * serverData, Deal * deal);
+void updateClientsOnBet(ServerData * serverData, Bet * bet);
 void updateClientsOn(ServerData * serverData, char action);
 void updateClientsOnIndex(ServerData * serverData, int index, char action);
 void payWinners(ServerData * serverData);

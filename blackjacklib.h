@@ -38,6 +38,7 @@
 #define SETACTIVE 'G'
 #define SETUNACTIVE 'H'
 #define UPDATEBALANCE 'I'
+#define UPDATEBET 'J'
 
 typedef struct Card{
 	char figure;
@@ -70,11 +71,13 @@ Card * newCard(char figure);
 Seat * newSeat();
 Table * newTable();
 Deal * newDeal(char card, int playerNumber);
+Bet * newBet(int bet, int playerNumber);
 
 void deleteCard(Card * card);
 void deleteSeat(Seat * seat);
 void deleteTable(Table * table);
 void deleteDeal(Deal * deal);
+void deleteBet(Bet * bet);
 int getCardValue(char figure);
 void clearSeat(Seat * seat);
 void clearTable(Table * table);

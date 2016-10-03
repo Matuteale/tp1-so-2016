@@ -44,6 +44,13 @@ Deal * requestDeal(Connection * connection) {
 	return deal;
 }
 
+Bet * requestBet(Connection * connection) {
+	int i = requestInt(connection);
+	int j = requestInt(connection);
+	Bet * bet = newBet(i,j);
+	return bet;
+}
+
 void sendStr(Connection * connection, char * str) {
 	usleep(CLOCK);
 	//DEBUG printf("ENVIANDO STR %s A %s FD %d\n", str, connection->output, connection->outputFD);
@@ -78,4 +85,9 @@ void sendChar(Connection * connection, char action) {
 void sendDeal(Connection * connection, Deal * deal) {
 	sendChar(connection, deal->card);
 	sendInt(connection, deal->playerNumber);
+}
+
+void sendBet(Connection * connection, Bet * bet) {
+	sendInt(connection, bet->bet);
+	sendInt(connection, bet->playerNumber);
 }

@@ -28,6 +28,13 @@ Deal * newDeal(char card, int playerNumber) {
 	return aux;
 }
 
+Bet * newBet(int bet, int playerNumber) {
+	Bet * aux = malloc(sizeof(Bet));
+	aux->bet = bet;
+	aux->playerNumber = playerNumber;
+	return aux;
+}
+
 void deleteCard(Card * card) {
 	free(card);
 }
@@ -47,6 +54,10 @@ void deleteTable(Table * table) {
 
 void deleteDeal(Deal * deal) {
 	free(deal);
+}
+
+void deleteBet(Bet * bet) {
+	free(bet);
 }
 
 int getCardValue(char figure) {

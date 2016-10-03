@@ -89,6 +89,11 @@ void waitForServer(ClientData * clientData) {
         }
         case UPDATEBALANCE: {
             updateBalance(clientData);
+            break;
+        }
+        case UPDATEBET: {
+            updateBet(clientData);
+            break;
         }
     }
 }
@@ -185,4 +190,12 @@ void setUnActiveAction(ClientData * clientData) {
 void updateBalance(ClientData * clientData) {
 
     clientData->balance = requestInt(clientData->serverConnection);
+}
+
+void updateBet(ClientData * clientData) {
+    Bet * bet = requestBet(clientData->serverConnection);
+
+    clientData->gameTable->seats[bet->playerNumber]->currentBet = bet->bet;
+
+    deleteBet(bet);
 }

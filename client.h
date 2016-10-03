@@ -26,5 +26,6 @@ void shuffleAction(ClientData * clientData);
 void setActiveAction(ClientData * clientData);
 void setUnActiveAction(ClientData * clientData);
 void updateBalance(ClientData * clientData);
+void updateBet(ClientData * clientData);
 
 #endif
