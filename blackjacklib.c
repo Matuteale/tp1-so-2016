@@ -138,7 +138,7 @@ void setUnActive(Seat * seat) {
 
 int hasDeckReachedLimit(int deckIndex) {
 	return ( (((double)deckIndex) / ((double)(CARDS_PER_DECK * PLAYING_DECKS)))
-		< (1 - DECK_PENETRATION) );
+		> ((double)(DECK_PENETRATION)) );
 }
 
 void showTable(Table * table) {
@@ -176,7 +176,7 @@ void showTable(Table * table) {
 }
 
 void clearScreen() {
-	int i = 100;
+	int i = 30;
 	while(i-- > 0) {
 		printf("\n");
 	}
@@ -239,14 +239,14 @@ int getInt(int size) {
 
 int charToInt(char c) {
 	if (c < '0' || c > '9') {
-		return NULL;
+		return -1;
 	}
 	return c - '0';
 }
 
 int strToInt(char * str) {
 	if (str == NULL) {
-		return NULL;
+		return -1;
 	}
 
 	int i = strlen(str)-1;
@@ -254,14 +254,15 @@ int strToInt(char * str) {
 	int aux = 0;
 
 	if (i <= 0 || i > MAX_DIGITS) {
-		return NULL;
+		return -1;
 	}
 
 	for ( ; i >= 0; i--) {
 		int digit = charToInt(str[i]);
-		if (digit == NULL) {
-			return NULL;
+		if (digit == -1) {
+			return -1;
 		}
+
 		aux += (digit * j);
 		j*= 10;
 	}

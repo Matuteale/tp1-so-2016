@@ -111,6 +111,7 @@ void bet(ClientData * clientData) {
             }
 
             int value = strToInt(str);
+            printf("LLEGUE HASTA ACA ESCRIBI %s EQUIVALE AL INT %d\n",str, value);
             free(str);
             if (value != NULL && value > 0) {
                 printf("ENVIANDO: %d\n", value);

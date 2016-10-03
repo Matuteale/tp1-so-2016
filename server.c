@@ -151,10 +151,8 @@ int requestBet(ServerData * serverData, int index) {
     int valid = 0;
     int bet;
     sendChar(serverData->clientTable[index], BET);
-    printf("D\n");
     while(!valid) {
         bet = requestInt(serverData->clientTable[index]);
-        printf("D\n");
         if (isBetValid(serverData, index, bet)) {
             valid = 1;
             sendStr(serverData->clientTable[index], SUCCESS);
@@ -177,7 +175,6 @@ void requestBetToPlayers(ServerData * serverData) {
             } else {
                 updateClientsOn(serverData, index, SETACTIVE);
                 int bet = requestBet(serverData, index);
-                printf("END OF REQUESTBET\n");
                 if (bet <= 0) {
                     disconnectClient(index, serverData);
                 } else {
@@ -288,9 +285,7 @@ void updateClientsOn(ServerData * serverData, int index, char action) {
             if (hasBeenDisconnected(i, serverData)) {
                 disconnectClient(i, serverData);
             } else {
-                printf("SENDING CHAR %c TO INDEX %d\n", action, i);
                 sendChar(serverData->clientTable[i], action);
-                printf("SENDING INT %d\n", index);
                 sendInt(serverData->clientTable[i], index);
             }
         }
@@ -329,9 +324,8 @@ int hasWon(Seat * seat, int croupierScore) {
 
 void dealInitialCards(ServerData * serverData) {
 
-printf("B\n");
     deal(serverData, CROUPIER_SEAT);
-printf("B\n");
+
     int i;
     int j;
     for (j = 0; j < 2; j++) {
@@ -357,9 +351,7 @@ void startRound(ServerData * serverData) {
             updateClientsOnShuffle(serverData);
             shuffleDeck(serverData);
         }
-        printf("A\n");
         requestBetToPlayers(serverData);
-        printf("A\n");
         dealInitialCards(serverData);
         askPlayerForHit(serverData);
         croupierPlay(serverData);
