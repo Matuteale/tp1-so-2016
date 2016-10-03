@@ -13,13 +13,9 @@ int main() {
     clientData->balance = STARTING_MONEY;
 
     while(1) {
-        bet(clientData);
-
-        /* LO QUE VA DENTRO DEL WHILE POSTA
         clearScreen();
-        showTable();
+        showTable(clientData->gameTable);
         waitForServer(clientData);
-        */
     }
 
     return 0;
@@ -57,6 +53,8 @@ void disconnectClient(ClientData * clientData) {
 }
 
 void waitForServer(ClientData * clientData) {
+
+    printf("Waiting for turn...\n");
 
     char c = requestChar(clientData->serverConnection);
 

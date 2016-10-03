@@ -8,7 +8,8 @@ Card * newCard(char figure) {
 }
 
 Seat * newSeat() {
-	Seat * aux = calloc(1,sizeof(Seat));
+	Seat * aux = calloc(1, sizeof(Seat));
+	return aux;
 }
 
 Table * newTable() {
@@ -17,12 +18,14 @@ Table * newTable() {
 	for(i = 0; i < MAX_PLAYERS + 1; i++) {
 		aux->seats[i] = newSeat();
 	}
+	return aux;
 }
 
 Deal * newDeal(char card, int playerNumber) {
 	Deal * aux = malloc(sizeof(Deal));
 	aux->card = card;
 	aux->playerNumber = playerNumber;
+	return aux;
 }
 
 void deleteCard(Card * card) {
@@ -136,6 +139,47 @@ void setUnActive(Seat * seat) {
 int hasDeckReachedLimit(int deckIndex) {
 	return ( (((double)deckIndex) / ((double)(CARDS_PER_DECK * PLAYING_DECKS)))
 		< (1 - DECK_PENETRATION) );
+}
+
+void showTable(Table * table) {
+
+	Seat * crSeat = table->seats[CROUPIER_SEAT];
+	int i, j;
+
+	printf("----------------------------------------------------------------------\n");
+	if (crSeat->isActive == 1)
+		printf("PLAYING >>> ");
+	printf("Croupier\n");
+	printf("Cards:   ");
+
+	for(i = 0; i < crSeat->handSize; i++) {
+		printf("%c ", crSeat->hand[i]);
+	}
+	printf("SCORE: %d  ", crSeat->score);
+	printf("\n\n\n");
+
+	for (j = 0; j < MAX_PLAYERS; j++) {
+		Seat * seat = table->seats[j];
+		if (seat->isActive == 1)
+			printf("PLAYING >>> ");
+		printf("Player %d\n", j);
+		printf("Cards:   ");
+		for(i = 0; i < seat->handSize; i++) {
+			printf("%c ", seat->hand[i]);
+		}
+		printf("SCORE: %d  ", seat->score);
+		printf("BET: %d  ", seat->currentBet);
+		printf("\n\n");
+	}
+	printf("----------------------------------------------------------------------\n");
+
+}
+
+void clearScreen() {
+	int i = 100;
+	while(i-- > 0) {
+		printf("\n");
+	}
 }
 
 //Utilities  -----------------------------------------------------------------------------------

@@ -18,10 +18,10 @@
 #define MAX_BUF 1024
 #define MAX_PATH 64
 #define MAX_PID_LENGTH 20
-#define MAX_PLAYERS 8
+#define MAX_PLAYERS 4
 #define MAX_CARDSINHAND 22
 #define MAX_DIGITS floor(log10(abs(INT_MAX)))
-#define CROUPIER_SEAT MAX_PLAYERS+1
+#define CROUPIER_SEAT MAX_PLAYERS
 
 // MSGS CODES
 #define SUCCESS "1"
@@ -51,7 +51,7 @@ typedef struct Seat{
 }Seat;
 
 typedef struct Table{
-	Seat * seats[MAX_PLAYERS];
+	Seat * seats[MAX_PLAYERS+1];
 }Table;
 
 typedef struct Deal{
@@ -78,6 +78,8 @@ int hasAce(Seat * seat);
 void setActive(Seat * seat);
 void setUnActive(Seat * seat);
 int hasDeckReachedLimit(int deckIndex);
+void showTable(Table * table);
+void clearScreen();
 
 // Utilities -----------------------------------------------------------------------------------
 void clearBuffer(char * buffer, int size);

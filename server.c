@@ -11,21 +11,10 @@ int main() {
     startServer(serverData);
 
     while(1) {
-        checkIncomingConnections(serverData);
-        checkCurrentConnections(serverData);
-        if (serverData->connectedBoolean[0] == 1) {
-            printf("LLEGA: %d\n", requestInt(serverData->clientTable[0]));
-            sendStr(serverData->clientTable[0], SUCCESS);
-        }
-    }
-
-    /* WHILE POSTA
-    while(1) {
         checkCurrentConnections(serverData);
         checkIncomingConnections(serverData);
         startRound(serverData);
     }
-    */
 
     return 0;
 }
@@ -162,8 +151,10 @@ int requestBet(ServerData * serverData, int index) {
     int valid = 0;
     int bet;
     sendChar(serverData->clientTable[index], BET);
+    printf("D\n");
     while(!valid) {
         bet = requestInt(serverData->clientTable[index]);
+        printf("D\n");
         if (isBetValid(serverData, index, bet)) {
             valid = 1;
             sendStr(serverData->clientTable[index], SUCCESS);
@@ -186,6 +177,7 @@ void requestBetToPlayers(ServerData * serverData) {
             } else {
                 updateClientsOn(serverData, index, SETACTIVE);
                 int bet = requestBet(serverData, index);
+                printf("END OF REQUESTBET\n");
                 if (bet <= 0) {
                     disconnectClient(index, serverData);
                 } else {
@@ -297,7 +289,7 @@ void updateClientsOn(ServerData * serverData, int index, char action) {
                 disconnectClient(i, serverData);
             } else {
                 sendChar(serverData->clientTable[i], action);
-                sendInt(index);
+                sendInt(serverData->clientTable[i], index);
             }
         }
     }
@@ -333,10 +325,11 @@ int hasWon(Seat * seat, int croupierScore) {
     return 1;
 }
 
-void dealInitialCards(serverData) {
+void dealInitialCards(ServerData * serverData) {
 
+printf("B\n");
     deal(serverData, CROUPIER_SEAT);
-
+printf("B\n");
     int i;
     int j;
     for (j = 0; j < 2; j++) {
@@ -356,14 +349,18 @@ void croupierPlay(ServerData * serverData) {
 }
 
 void startRound(ServerData * serverData) {
-    if (hasDeckReachedLimit(serverData)) {
-        clearTable(serverData->gameTable);
-        updateClientsOnShuffle(serverData);
-        shuffleDeck(serverData);
+    if (MAX_PLAYERS - emptySpots(serverData) > 0) {
+        if (hasDeckReachedLimit(serverData->deckIndex)) {
+            clearTable(serverData->gameTable);
+            updateClientsOnShuffle(serverData);
+            shuffleDeck(serverData);
+        }
+        printf("A\n");
+        requestBetToPlayers(serverData);
+        printf("A\n");
+        dealInitialCards(serverData);
+        askPlayerForHit(serverData);
+        croupierPlay(serverData);
+        payWinners(serverData);
     }
-    requestBetToPlayers(serverData);
-    dealInitialCards(serverData);
-    askPlayerForHit(serverData);
-    croupierPlay(serverData);
-    payWinners(serverData);
 }

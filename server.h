@@ -45,7 +45,7 @@ void updateClientsOnShuffle(ServerData * serverData);
 void updateClientsOn(ServerData * serverData, int index, char action);
 void payWinners(ServerData * serverData);
 int hasWon(Seat * seat, int croupierScore);
-void dealInitialCards(serverData);
+void dealInitialCards(ServerData * serverData);
 void croupierPlay(ServerData * serverData);
 void startRound(ServerData * serverData);
 
