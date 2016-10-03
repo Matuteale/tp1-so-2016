@@ -182,6 +182,7 @@ void requestBetToPlayers(ServerData * serverData) {
                     disconnectClient(index, serverData);
                 } else {
                     serverData->balance[index] -= bet;
+                    serverData->gameTable->seats[index]->currentBet = bet;
                     updateBalance(serverData, index);
                 }
                 updateClientsOnIndex(serverData, index, SETUNACTIVE);
@@ -306,7 +307,7 @@ void payWinners(ServerData * serverData) {
                 disconnectClient(i, serverData);
             } else {
                 if(hasWon(serverData->gameTable->seats[i], 
-                    serverData->gameTable->seats[CROUPIER_SEAT])) {
+                    serverData->gameTable->seats[CROUPIER_SEAT]->score)) {
                     serverData->balance[i] +=
                         (serverData->gameTable->seats[i]->currentBet *2);
                     updateBalance(serverData, i);
@@ -335,7 +336,7 @@ void dealInitialCards(ServerData * serverData) {
     for (j = 0; j < 2; j++) {
         for (i = 0; i < MAX_PLAYERS; i++) {
             if (serverData->connectedBoolean[i] == 1) {
-            deal(serverData, i);
+                deal(serverData, i);
             }
         }
     }
@@ -357,6 +358,7 @@ void startRound(ServerData * serverData) {
             updateClientsOn(serverData, SHUFFLE);
             shuffleDeck(serverData);
         } else {
+            clearTable(serverData->gameTable);
             updateClientsOn(serverData, CLEARTABLE);
         }
         requestBetToPlayers(serverData);
@@ -364,5 +366,6 @@ void startRound(ServerData * serverData) {
         askPlayerForHit(serverData);
         croupierPlay(serverData);
         payWinners(serverData);
+        sleep(6); //ES ESTETICO PARA QUE LOS CLIENTES PUEDAN VER COMO TERMINO LA RONDA
     }
 }
