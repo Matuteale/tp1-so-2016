@@ -1,15 +1,15 @@
 #include "blackjacklib.h"
-#include "server.h"
+#include "serverSocket.h"
 #include <sys/types.h>
 
 int main() {
 
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
-    strcpy(serverData->srvpath, SRV_PATH);
 
-    startServer(serverData);
-
+    int socketFD = startServer();
+    serverData->socketFD = socketFD;
+    comListen(socketFD);
     while(1) {
         checkCurrentConnections(serverData);
         checkIncomingConnections(serverData);
@@ -21,27 +21,19 @@ int main() {
 
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
-    serverData->srvpath = malloc(sizeof(SRV_PATH));
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
     return serverData;
 }
 
 void deleteServerData(ServerData * serverData) {
-    free(serverData->srvpath);
     free(serverData);
 }
 
 // Connection related functions ---------------------------------------------------------------
 
-int startServer(ServerData * serverData) {
+int startServer() {
 
-    /* Creating SRV FIFO */
-    unlink(SRV_PATH);
-    mkfifo(SRV_PATH, 0666);
-
-    open(SRV_PATH, O_RDONLY | O_NONBLOCK);
-    
-    return 1;
+    return createOriginalSocket();
 }
 
 int emptySpots(ServerData * serverData) {
@@ -71,15 +63,14 @@ int firstEmptySpot(ServerData * serverData) {
 
 void checkIncomingConnections(ServerData * serverData) {
     int i;
-    for (i = 0; i < emptySpots(serverData); i++) {
-        if (emptySpots(serverData) > 0) {
-            char * listened = comListen(serverData->srvpath);
-            if (listened != NULL) {
+    int socketFD = serverData->socketFD;
+    if (emptySpots(serverData) > 0) {
+            Connection * listened = comAccept(socketFD);
+            if (listened->socketFD != NULL) {
                 printf("Connection detected\n");
-                addClient(comAccept(listened), serverData);
+                addClient(listened, serverData);
             }
         }
-    }
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
@@ -103,10 +94,7 @@ int disconnectClient(int index, ServerData * serverData) {
 }
 
 int hasBeenDisconnected(int index, ServerData * serverData) {
-    if( access(serverData->clientTable[index]->output, F_OK ) != -1 ) {
-        return 0;
-    }
-    return 1;
+    return send(serverData->clientTable[index]->socketFD, "c", 1, MSG_NOSIGNAL);
 }
 
 void checkCurrentConnections(ServerData * serverData) {

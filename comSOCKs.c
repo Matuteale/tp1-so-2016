@@ -1,92 +1,100 @@
 #include "com.h"
 #include "comSOCKs.h"
 #include "blackjacklib.h"
+#define MAX_PLAYERS 8
 
-Connection * newConnection();
+Connection * newConnection() {
+	Connection * connection;
+	connection = malloc(sizeof (Connection));
+    if (connection == NULL) {
+        return NULL;
+    }
+    return connection;
+}
 
 Connection * comConnect(char * addr) {
-	Connection connection = malloc(sizeof(*connection));
-	if(connection == NULL) {
+	int fd;
+	Connection * connection = newConnection();
+	struct sockaddr_un cliAddress;
+
+	fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	if(fd == -1){
 		return NULL;
 	}
-	return 
-}
-char * comListen(char * addr);
-Connection * comAccept(char * addressToAccept);
-int comWrite(Connection * connection, char * dataToWrite, int size);
-int comRead(Connection * connection, char * dataToRead, int size);
-void disconnect(Connection * connection);
-
-/** Protocol functions **/
-
-static int generateTCPSocketClient(Connection connection) {
-	struct sockaddr_in srvAddr;
-	srvAddr.sin_family = AF_INET;
-	srvAddr.sin_port = htons(connection->port);
-	//TODO validar
-	inet_pton(AF_INET, connection->ip, &srvAddr.sin_addr);
-	if((connection->socketFD = createSocket(PF_INET, SOCK_STREAM, 0)) < 0 ) { //PF_INET to call socket, AF for the struct
-		return -1
+	memset(&cliAddress, 0, sizeof(struct sockaddr_un));
+	cliAddress.sun_family = AF_UNIX;
+	strncpy(cliAddress.sun_path, addr, sizeof(cliAddress.sun_path) - 1);
+	if (connect(fd, (struct sockaddr *) &cliAddress, sizeof(cliAddress)) == -1){
+		return NULL;	
 	}
-	if(connectSocket(connection->socketFD, (struct sockaddr*) sizeof(srvAddr))) {
-		return -1;
-	}
-	return 0;
+	connection->socketFD = fd;
+	return connection;
 }
 
-
-static int generateTCPSocketServer(Connection connection) {
-	struct sockaddr_in srv;
-
-	srv.sin_family = AF_INET;
-	srv.sin_addr.s_addr = htonl(INADDR_ANY); //Permite connecciones multiples
-	srv.sin_port = htons(connection->port);
-	if((connection->socketFD = createSocket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		return -1;
-	}
-	if(bindSocket(connection->socketFD, (struct sockaddr*) &srv, sizeof(srv))){
-		return -1;
-	}
-	if(listenSocket(connection->socketFD, 10)) {
-		return -1;
-	}
-	return 0;
+char * comListen(char * addr) {
+	printf("el fd del server es %d\n", (int)addr);
+	int socketFD = (int) addr;
+    while(listen(socketFD, MAX_PLAYERS) == -1);
+    return socketFD;
 }
 
-/** Socket Function with respective validations**/
-
-static int createSocket(int domain, int type, int protocolDesc) {
-	int socket = socket(domain, type, protocolDesc);
-	if(socket == -1) {
-		return fprintf(stderr, "Socket creation failed\n", );
-	}
-	return socket;
+Connection * comAccept(char * addressToAccept) {
+	Connection * connection = newConnection();
+	struct sockaddr_un cliName;
+	socklen_t cliNameLen;
+	int fd = (int)addressToAccept;
+	connection->socketFD = accept(fd, (struct sockaddr*)&cliName, &cliNameLen);
+	return connection;
 }
 
-static int connectSocket(int socketFD, const struct sockaddr * address, socklen_t addressLen) {
-	if(connect(socketFD, address, addressLen)) {
-		fprintf(stderr, "Could not connect\n");
-		return -1;
-	}	
-	return 0;
+int comWrite(Connection * connection, char * dataToWrite, int size) {
+	 char * buf = malloc(MAX_BUF);
+
+    clearBuffer(buf, MAX_BUF);
+
+    while(strcmp(buf, SUCCESS) != 0) {
+        clearBuffer(buf, MAX_BUF);
+        read(connection->socketFD, buf, sizeof(SUCCESS) +1);
+    }
+
+    free(buf);
+
+    return write(connection->socketFD, dataToWrite, size);
+
+}
+int comRead(Connection * connection, char * dataToRead, int size){
+	char * buf = malloc(MAX_BUF);
+
+    strcpy(buf, SUCCESS);
+
+    write(connection->socketFD, buf, sizeof(SUCCESS)+1);
+
+    free(buf);
+
+    int ret;
+
+    while(ret = read(connection->socketFD, dataToRead, size) <= 0);
+
+    return ret;
+	
+}
+void disconnect(Connection * connection) {
+	close(connection->socketFD);
 }
 
-static int bindSocket(int socketFD, const struct sockaddr * address, socklen_t addressLen) {
-	if(bind(socketFD, address, addressLen)) {
-		fprintf(stderr, "Could not bind\n");
-		return -1;
-	}	
-	return 0;
+int createOriginalSocket() {
+    int socketFD;
+    socketFD = socket(AF_UNIX, SOCK_STREAM, 0);
+    if(socketFD == -1) {
+        return -1;
+    }
+    struct sockaddr_un fixedAddress;
+    memset(&fixedAddress, 0, sizeof(struct sockaddr_un));
+    fixedAddress.sun_family = AF_UNIX;
+    strncpy(fixedAddress.sun_path, SRV_PATH, sizeof(fixedAddress.sun_path) - 1);
+    if (bind(socketFD, (struct sockaddr *) &fixedAddress, sizeof(fixedAddress)) < 0){
+        return NULL;    
+    }
+    return socketFD;
 }
 
-static int listenSocket(int socketFD, int backlog) {
-	if(listen(socketFD, backlog)) {
-		fprintf(stderr, "Could not listen\n");
-		return -1;
-	}	
-	return 0;
-}
-
-static int closeSocket() {
-	return 0;
-}
