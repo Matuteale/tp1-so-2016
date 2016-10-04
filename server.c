@@ -159,6 +159,9 @@ int requestBetTo(ServerData * serverData, int index) {
     sendChar(serverData->clientTable[index], BET);
     while(!valid) {
         bet = requestInt(serverData->clientTable[index]);
+        if (bet == 0) {
+            return bet;
+        }
         if (isBetValid(serverData, index, bet)) {
             valid = 1;
             sendStr(serverData->clientTable[index], SUCCESS);
@@ -185,6 +188,7 @@ void requestBetToPlayers(ServerData * serverData) {
                 int bet = requestBetTo(serverData, index);
                 if (bet <= 0) {
                     disconnectClient(index, serverData);
+                    updateClientsOnIndex(serverData, index, CLEARSEAT);
                 } else {
                     serverData->balance[index] -= bet;
                     serverData->gameTable->seats[index]->currentBet = bet;

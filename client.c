@@ -71,6 +71,10 @@ void waitForServer(ClientData * clientData) {
             deal(clientData);
             break;
         }
+        case CLEARSEAT: {
+            clearSeatAction(clientData);
+            break;
+        }
         case CLEARTABLE: {
             clearTableAction(clientData);
             break;
