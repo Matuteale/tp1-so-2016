@@ -8,4 +8,8 @@ typedef struct Connection {
     int outputFD;
 };
 
+typedef struct Parameters {
+    char * addr; //Adress 
+};
+
 #endif

@@ -3,12 +3,10 @@
 
 int main() {
 
-    char * srvaddr = malloc(sizeof(SRV_PATH));
+    Parameters * params = newParameters();
 
     ClientData * clientData = newClientData();
-
-    strcpy(srvaddr, SRV_PATH);
-    clientData->serverConnection = comConnect(srvaddr);
+    clientData->serverConnection = comConnect(params);
     clientData->gameTable = newTable();
     clientData->balance = STARTING_MONEY;
 
@@ -20,6 +18,13 @@ int main() {
 
     return 0;
 
+}
+
+Parameters * newParameters() {
+    Parameters * params = malloc(sizeof(Parameters));
+    params->addr = malloc(sizeof(SRV_PATH));
+    strcpy(params->addr, SRV_PATH);
+    return params;
 }
 
 ClientData * newClientData() {

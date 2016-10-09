@@ -6,7 +6,7 @@
 #include "blackjacklib.h"
 
 typedef struct ServerData{
-	char * srvpath;
+	Parameters * params;
 	Connection * clientTable[MAX_PLAYERS];
     int connectedBoolean[MAX_PLAYERS];
     Table * gameTable;

@@ -13,13 +13,13 @@ Connection * newConnection() {
 }
 
 
-char * comListen(char * addr) {
+char * comListen(Parameters * params) {
 
     int inputAuxFD;
 
     char buffer[MAX_BUF];
 
-    inputAuxFD = open(addr, O_RDONLY | O_NONBLOCK);
+    inputAuxFD = open(params->addr, O_RDONLY | O_NONBLOCK);
 
     if (read(inputAuxFD, buffer, MAX_BUF) <= 0) {
         close(inputAuxFD);
@@ -35,14 +35,14 @@ char * comListen(char * addr) {
 
 }
 
-Connection * comAccept(char * addressToAccept) {
+Connection * comAccept(Parameters * params) {
 
     char buffer[MAX_BUF];
 
     Connection * connection = newConnection();
 
     /* Copying CLIENTIN FIFO PATH to Connection Output */
-    strcpy(connection->output, addressToAccept);
+    strcpy(connection->output, params->addr);
 
     /* Opening OUTPUT (CLIENTIN) FD */
     connection->outputFD = open(connection->output, O_WRONLY);
@@ -79,7 +79,7 @@ Connection * comAccept(char * addressToAccept) {
 
 }
 
-Connection * comConnect(char * addr) {
+Connection * comConnect(Parameters * params) {
 
     int outputAuxFD;
     char * auxPID;
@@ -94,7 +94,7 @@ Connection * comConnect(char * addr) {
     sprintf(auxPID, "%d", getpid());
 
     /* Creating INPUT path */
-    strcpy(connection->input, addr);
+    strcpy(connection->input, params->addr);
     strcat(connection->input, auxPID);
     strcat(connection->input, "CLIENTIN");
 
@@ -103,7 +103,7 @@ Connection * comConnect(char * addr) {
     mkfifo(connection->input, 0666);
 
     /* Opening AUX OUTPUT FD */
-    outputAuxFD = open(addr, O_WRONLY);
+    outputAuxFD = open(params->addr, O_WRONLY);
 
     /* Opening INPUT FD */
     connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);

@@ -13,5 +13,9 @@ typedef struct Connection
 	int socketFD;
 };
 
+typedef struct Parameters {
+    //Defino mis parámetros
+};
+
 
 /** Address format xxx.xxx.xxx.xxx:PPPPP **/

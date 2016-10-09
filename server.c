@@ -6,7 +6,7 @@ int main() {
 
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
-    serverData->srvpath = readStrFromFile("SERVERPATH.txt");
+    serverData->params->addr = readStrFromFile("SERVERPATH.txt");
 
     startServer(serverData);
 
@@ -22,15 +22,21 @@ int main() {
     return 0;
 }
 
+Parameters * newParameters() {
+    Parameters * params = malloc(sizeof(Parameters));
+    params->addr = malloc(MAX_PATH);
+    return params;
+}
+
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
-    serverData->srvpath = malloc(MAX_PATH);
+    serverData->params = newParameters();
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
     return serverData;
 }
 
 void deleteServerData(ServerData * serverData) {
-    free(serverData->srvpath);
+    free(serverData->params);
     free(serverData);
 }
 
@@ -39,10 +45,10 @@ void deleteServerData(ServerData * serverData) {
 int startServer(ServerData * serverData) {
 
     /* Creating SRV FIFO */
-    unlink(serverData->srvpath);
-    mkfifo(serverData->srvpath, 0666);
+    unlink(serverData->params->addr);
+    mkfifo(serverData->params->addr, 0666);
 
-    open(serverData->srvpath, O_RDONLY | O_NONBLOCK);
+    open(serverData->params->addr, O_RDONLY | O_NONBLOCK);
     
     return 1;
 }
@@ -76,10 +82,12 @@ void checkIncomingConnections(ServerData * serverData) {
     int i;
     for (i = 0; i < emptySpots(serverData); i++) {
         if (emptySpots(serverData) > 0) {
-            char * listened = comListen(serverData->srvpath);
-            if (listened != NULL) {
+            Parameters * params = newParameters();
+            params->addr = comListen(serverData->params);
+            if (params->addr != NULL) {
+                printf("fffff\n");
                 printf("Connection detected\n");
-                addClient(comAccept(listened), serverData);
+                addClient(comAccept(params->addr), serverData);
             }
         }
     }
