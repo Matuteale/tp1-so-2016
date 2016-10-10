@@ -10,7 +10,7 @@ int requestInt(Connection * connection); //BLOCKING
 Deal * requestDeal(Connection * connection); //BLOCKING
 Bet * requestBet(Connection * connection); //BLOCKING
 
-void sendChar(Connection * connection, char action); //NON BLOCKING
+void sendChar(Connection * connection, char c); //NON BLOCKING
 void sendStr(Connection * connection, char * str); //NON BLOCKING
 void sendInt(Connection * connection, int integer); //NON BLOCKING
 void sendDeal(Connection * connection, Deal * deal); //NON BLOCKING

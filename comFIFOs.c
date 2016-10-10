@@ -56,6 +56,7 @@ Connection * comAccept(char * addressToAccept) {
     mkfifo(connection->input, 0666);
 
     /* Opening CLIENTOUT FD */
+    //connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
     connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
 
     /* Writing CLIENTOUT FIFO PATH to Client */

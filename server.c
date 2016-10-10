@@ -288,7 +288,7 @@ void updateClientsOnBet(ServerData * serverData, Bet * bet) {
                 disconnectClient(index, serverData);
             } else {
                 sendChar(serverData->clientTable[index], UPDATEBET);
-                sendDeal(serverData->clientTable[index], bet);
+                sendBet(serverData->clientTable[index], bet);
             }
         }
     }
