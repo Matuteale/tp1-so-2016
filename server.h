@@ -27,6 +27,7 @@ void checkIncomingConnections(ServerData * serverData);
 void addClient(Connection * connection, ServerData * serverData);
 int disconnectClient(int index, ServerData * serverData);
 int hasBeenDisconnected(int index, ServerData * serverData);
+int checkConnection(int index, ServerData * serverData);
 void checkCurrentConnections(ServerData * serverData);
 
 // Game related functions ----------------------------------------------------------------------
