@@ -29,7 +29,7 @@ char * comListen(char * addr) {
     char * aux = malloc(MAX_BUF);
     strcpy(aux, buffer);
 
-    close(inputAuxFD);
+    //close(inputAuxFD);
 
     return aux;
 

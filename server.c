@@ -3,7 +3,9 @@
 #include <sys/types.h>
 
 int main() {
-
+    dropTable();
+    startDatabase();
+    readTable();
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
     serverData->srvpath = readStrFromFile("SERVERPATH.txt");
@@ -195,6 +197,7 @@ void requestBetToPlayers(ServerData * serverData) {
             } else {
                 //TODO: ACA DEBERIA INTERACTUAR CON LA BASE DE DATOS.
                 serverData->balance[index] -= bet;
+                changeSeatMoney(index, serverData->balance[index]);
                 serverData->gameTable->seats[index]->currentBet = bet;
                 Bet * aux = newBet(bet,index);
                 updateClientsOnBet(serverData, aux);
@@ -204,6 +207,7 @@ void requestBetToPlayers(ServerData * serverData) {
             updateClientsOnIndex(serverData, index, SETUNACTIVE);
         }
     }
+    readTable();
 }
 
 int isBetValid(ServerData * serverData, int index, int bet) {
@@ -319,11 +323,13 @@ void payWinners(ServerData * serverData) {
                 case DRAW: {
                     serverData->balance[i] +=
                     serverData->gameTable->seats[i]->currentBet;
+                    changeSeatMoney(i, serverData->balance[i]);
                     break;
                 }
                 case WIN: {
                     serverData->balance[i] +=
                     (serverData->gameTable->seats[i]->currentBet *2);
+                    changeSeatMoney(i, serverData->balance[i]);
                 }
             }
             updateBalance(serverData, i);
