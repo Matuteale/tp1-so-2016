@@ -16,6 +16,7 @@ int main() {
         clearScreen();
         showTable(clientData->gameTable);
         waitForServer(clientData);
+        usleep(CLOCK);
     }
 
     return 0;
@@ -169,7 +170,7 @@ void shuffleAction(ClientData * clientData) {
 
     printf("Deck is being Shuffled ...");
 
-    clearTableAction(clientData);
+    sleep(3); //SOLO ESTETICO
 
     //TODO: VER SI AGREGAR UN WAIT DE 3 SEGUNDOS ROMPE ALGO. ES SOLO ESTETICO.
 }

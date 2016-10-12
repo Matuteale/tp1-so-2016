@@ -8,7 +8,7 @@
 #include <math.h>
 #include <limits.h>
 
-#define CLOCK 100000
+#define CLOCK 200000
 
 #define CARDS_PER_DECK 52
 #define PLAYING_DECKS 6
@@ -26,6 +26,10 @@
 #define MAX_CARDSINHAND 22
 #define MAX_DIGITS floor(log10(abs(INT_MAX)))
 #define CROUPIER_SEAT MAX_PLAYERS
+
+#define LOSE -1
+#define DRAW 0
+#define WIN 1
 
 // MSGS CODES
 #define SUCCESS "1"
@@ -90,6 +94,7 @@ int hasAce(Seat * seat);
 void setActive(Seat * seat);
 void setUnActive(Seat * seat);
 int hasDeckReachedLimit(int deckIndex);
+int hasWon(Seat * seat, int croupierScore);
 void showTable(Table * table);
 void clearScreen();
 

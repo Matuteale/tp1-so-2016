@@ -147,6 +147,19 @@ int hasDeckReachedLimit(int deckIndex) {
 		> ((double)(DECK_PENETRATION)) );
 }
 
+int hasWon(Seat * seat, int croupierScore) {
+    if (seat->score > MAX_SCORE) {
+        return LOSE;
+    }
+    if (seat->score < croupierScore && croupierScore <= MAX_SCORE ) {
+        return LOSE;
+    }
+    if (seat->score == croupierScore) {
+    	return DRAW;
+    }
+    return WIN;
+}
+
 void showTable(Table * table) {
 
 	Seat * crSeat = table->seats[CROUPIER_SEAT];
