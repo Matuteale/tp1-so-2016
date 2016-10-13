@@ -22,3 +22,7 @@ void changeSeatMoney(int seat, int moneyToChange) {
 void dropTable() {
 	DBDropTable();
 }
+
+void getMoney(int seat) {
+	DBGetSeatMoney(seat);
+}

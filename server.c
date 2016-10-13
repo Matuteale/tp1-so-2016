@@ -363,6 +363,7 @@ void croupierPlay(ServerData * serverData) {
 
 void startRound(ServerData * serverData) {
     if (MAX_PLAYERS - emptySpots(serverData) > 0) {
+        readTable();
         if (hasDeckReachedLimit(serverData->deckIndex)) {
             shuffleDeck(serverData);
         }
