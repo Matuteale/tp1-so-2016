@@ -85,9 +85,9 @@ void checkIncomingConnections(ServerData * serverData) {
             Parameters * params = newParameters();
             params->addr = comListen(serverData->params);
             if (params->addr != NULL) {
-                printf("fffff\n");
+                printf("encontré\n");
                 printf("Connection detected\n");
-                addClient(comAccept(params->addr), serverData);
+                addClient(comAccept(params), serverData);
             }
         }
     }

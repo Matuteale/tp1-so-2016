@@ -41,8 +41,12 @@ Connection * comAccept(Parameters * params) {
 
     Connection * connection = newConnection();
 
+    printf("ggggg\n");
+    printf("%s\n", params->addr );
+    printf("gg2\n");
     /* Copying CLIENTIN FIFO PATH to Connection Output */
     strcpy(connection->output, params->addr);
+    printf("gg2\n");
 
     /* Opening OUTPUT (CLIENTIN) FD */
     connection->outputFD = open(connection->output, O_WRONLY);
@@ -57,6 +61,7 @@ Connection * comAccept(Parameters * params) {
 
     /* Opening CLIENTOUT FD */
     connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
+    printf("fffff\n");
 
     /* Writing CLIENTOUT FIFO PATH to Client */
     write(connection->outputFD, connection->input, MAX_BUF);
@@ -65,7 +70,6 @@ Connection * comAccept(Parameters * params) {
  
     comRead(connection, buffer, MAX_BUF);
     // O ACA
-
     if (strcmp(buffer, SUCCESS) == 0) {
         strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
         comWrite(connection, buffer, MAX_BUF);
