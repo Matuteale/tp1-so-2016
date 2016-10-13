@@ -7,6 +7,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include <limits.h>
+#include "database.h"
 
 #define CLOCK 200000
 
@@ -17,8 +18,8 @@
 #define SUITS 4
 #define MAX_SCORE 21
 #define STARTING_MONEY 100
+#define CROUPIER_MINSCORE 17
 
-#define SRV_PATH "/tmp/srv\0"
 #define MAX_BUF 1024
 #define MAX_PATH 64
 #define MAX_PID_LENGTH 20

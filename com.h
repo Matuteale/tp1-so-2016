@@ -10,11 +10,17 @@
 #include <errno.h>
 
 typedef struct Connection Connection;
+typedef struct ComAddress ComAddress;
 
 Connection * newConnection();
-Connection * comConnect(char * addr);
-char * comListen(char * addr);
-Connection * comAccept(char * addressToAccept);
+ComAddress * newComAddress();
+void deleteComAddress(ComAddress * address);
+Connection * comConnect(ComAddress * address);
+ComAddress * comListen(ComAddress * address);
+Connection * comAccept(ComAddress * addressToAccept);
+void openListener(ComAddress * address);
+void closeListener(ComAddress * address);
+int isConnected(ComAddress * address);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
 void disconnect(Connection * connection);

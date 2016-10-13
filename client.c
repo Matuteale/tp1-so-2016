@@ -3,12 +3,15 @@
 
 int main() {
 
-    char * srvaddr = malloc(sizeof(SRV_PATH));
+    ComAddress * srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
     ClientData * clientData = newClientData();
 
-    strcpy(srvaddr, SRV_PATH);
-    clientData->serverConnection = comConnect(srvaddr);
+    clientData->serverConnection = comConnect(srvAddress);
+
+    if (clientData->serverConnection == NULL) {
+        deleteClientData(clientData);
+    }
     clientData->gameTable = newTable();
     clientData->balance = STARTING_MONEY;
 
@@ -171,8 +174,6 @@ void shuffleAction(ClientData * clientData) {
     printf("Deck is being Shuffled ...");
 
     sleep(3); //SOLO ESTETICO
-
-    //TODO: VER SI AGREGAR UN WAIT DE 3 SEGUNDOS ROMPE ALGO. ES SOLO ESTETICO.
 }
 
 void setActiveAction(ClientData * clientData) {

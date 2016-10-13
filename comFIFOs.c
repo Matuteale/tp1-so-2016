@@ -5,85 +5,93 @@
 
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
-    connection->input = malloc(MAX_BUF);
-    memset(connection->input, 0, MAX_BUF);
-    connection->output = malloc(MAX_BUF);
-    memset(connection->output, 0, MAX_BUF);
     return connection;
 }
 
+ComAddress * newComAddress(char * path) {
+    ComAddress * address = malloc(sizeof(ComAddress));
+    address->path = path;
+    return address;
+}
 
-char * comListen(char * addr) {
+void deleteComAddress(ComAddress * address) {
+    free(address->path);
+    free(address);
+}
+
+
+ComAddress * comListen(ComAddress * address) {
 
     int inputAuxFD;
 
     char buffer[MAX_BUF];
 
-    inputAuxFD = open(addr, O_RDONLY | O_NONBLOCK);
+    inputAuxFD = open(address->path, O_RDONLY | O_NONBLOCK);
 
     if (read(inputAuxFD, buffer, MAX_BUF) <= 0) {
         close(inputAuxFD);
         return NULL;
     }
 
-    char * aux = malloc(MAX_BUF);
-    strcpy(aux, buffer);
+    char * path = malloc(strlen(buffer)+1);
+    strcpy(path, buffer);
 
-    //close(inputAuxFD);
+    close(inputAuxFD);
+
+    ComAddress * aux = newComAddress(path);
 
     return aux;
-
 }
 
-Connection * comAccept(char * addressToAccept) {
+Connection * comAccept(ComAddress * addressToAccept) {
 
     char buffer[MAX_BUF];
+    char * inputPath;
 
     Connection * connection = newConnection();
 
     /* Copying CLIENTIN FIFO PATH to Connection Output */
-    strcpy(connection->output, addressToAccept);
+    connection->output = addressToAccept;
 
     /* Opening OUTPUT (CLIENTIN) FD */
-    connection->outputFD = open(connection->output, O_WRONLY);
+    connection->outputFD = open(connection->output->path, O_WRONLY);
 
     /* Creating CLIENTOUT FIFO PATH */
-    strncpy(connection->input, connection->output, indexOf(connection->output,'C'));
-    strcat(connection->input, "CLIENTOUT");
+    inputPath = malloc(strlen(connection->output->path)+2);
+    strncpy(inputPath, connection->output->path, indexOf(connection->output->path,'C'));
+    strcat(inputPath, "CLIENTOUT");
+    connection->input = newComAddress(inputPath);
 
     /* Creating CLIENTOUT FIFO */
-    unlink(connection->input);
-    mkfifo(connection->input, 0666);
+    unlink(connection->input->path);
+    mkfifo(connection->input->path, 0666);
 
     /* Opening CLIENTOUT FD */
-    //connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
-    connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
 
     /* Writing CLIENTOUT FIFO PATH to Client */
-    write(connection->outputFD, connection->input, MAX_BUF);
-
-    //ACA IRIAN LOS CLOSE
+    write(connection->outputFD, connection->input->path, MAX_BUF);
  
     comRead(connection, buffer, MAX_BUF);
-    // O ACA
 
     if (strcmp(buffer, SUCCESS) == 0) {
-        strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
         comWrite(connection, buffer, MAX_BUF);
         printf("CONNECTED\n");
         return connection;
     } else {
-        unlink(connection->input);
+        disconnect(connection);
     }
 
     return NULL;
 
 }
 
-Connection * comConnect(char * addr) {
+Connection * comConnect(ComAddress * address) {
 
     int outputAuxFD;
     char * auxPID;
+    char * inputPath;
+    char * outputPath;
     char buffer[MAX_BUF];
 
     Connection * connection = newConnection();
@@ -95,22 +103,25 @@ Connection * comConnect(char * addr) {
     sprintf(auxPID, "%d", getpid());
 
     /* Creating INPUT path */
-    strcpy(connection->input, addr);
-    strcat(connection->input, auxPID);
-    strcat(connection->input, "CLIENTIN");
+    inputPath = malloc(strlen(address->path) + strlen(auxPID) + strlen("CLIENTIN") +1);
+    strcpy(inputPath, address->path);
+    strcat(inputPath, auxPID);
+    free(auxPID);
+    strcat(inputPath, "CLIENTIN");
+    connection->input = newComAddress(inputPath);
 
     /* Creating INPUT Fifo */
-    unlink(connection->input);
-    mkfifo(connection->input, 0666);
+    unlink(connection->input->path);
+    mkfifo(connection->input->path, 0666);
 
     /* Opening AUX OUTPUT FD */
-    outputAuxFD = open(addr, O_WRONLY);
+    outputAuxFD = open(address->path, O_WRONLY);
 
     /* Opening INPUT FD */
-    connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
 
     /* Writing INPUT FIFO PATH to AUX OUTPUT FD, requesting a connection */
-    write(outputAuxFD, connection->input, MAX_BUF);
+    write(outputAuxFD, connection->input->path, MAX_BUF);
 
     /* Waiting for SRV response */
     while(read(connection->inputFD, buffer, MAX_BUF) <= 0);
@@ -119,23 +130,44 @@ Connection * comConnect(char * addr) {
     close(outputAuxFD);
 
     /* Opening OUTPUT FD */
-    strcpy(connection->output, buffer);
-    connection->outputFD = open(connection->output, O_WRONLY);
+    outputPath = malloc(strlen(buffer)+1);
+    strcpy(outputPath, buffer);
+    connection->output = newComAddress(outputPath);
+    connection->outputFD = open(connection->output->path, O_WRONLY);
 
     /* Requesting SRV confirmation on successful connection */
-    strcpy(buffer, SUCCESS); //If i just send SUCCESS in the line below it doesnt work.
+    strcpy(buffer, SUCCESS);
     comWrite(connection, buffer, MAX_BUF);
 
-    /* Waiting for SRV response */ //TODO: FIX WARNINGS, SHOULD COMPARE BYTES.
+    /* Waiting for SRV response */
     comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
         printf("CONNECTED\n");
         return connection;
     } else {
-        unlink(connection->input);
+        disconnect(connection);
     }
     
     return NULL;
+}
+
+void openListener(ComAddress * address) {
+    unlink(address->path);
+    mkfifo(address->path, 0666);
+
+    open(address->path, O_RDONLY | O_NONBLOCK);
+}
+
+void closeListener(ComAddress * address) {
+    close(address->path);
+    unlink(address->path);
+}
+
+int isConnected(ComAddress * address) {
+    if( access(address->path, F_OK ) != -1 ) {
+        return 1;
+    }
+    return 0;
 }
 
 int comWrite(Connection * connection, char * dataToWrite, int size) {
@@ -157,8 +189,9 @@ int comRead(Connection * connection, char * dataToRead, int size) {
 void disconnect(Connection * connection) {
     close(connection->inputFD);
     close(connection->outputFD);
-    unlink(connection->input);
-    free(connection->input);
-    free(connection->output);
+    unlink(connection->input->path);
+    unlink(connection->output->path);
+    deleteComAddress(connection->input);
+    deleteComAddress(connection->output);
     free(connection);
 }

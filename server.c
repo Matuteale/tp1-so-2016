@@ -3,15 +3,14 @@
 #include <sys/types.h>
 
 int main() {
-    dropTable();
-    startDatabase();
-    readTable();
+
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
-    serverData->srvpath = readStrFromFile("SERVERPATH.txt");
+    serverData->srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
-    startServer(serverData);
+    openListener(serverData->srvAddress);
 
+    initializeDataBase();
     generateDeck(serverData);
     shuffleDeck(serverData);
 
@@ -26,27 +25,20 @@ int main() {
 
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
-    serverData->srvpath = malloc(MAX_PATH);
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
     return serverData;
 }
 
 void deleteServerData(ServerData * serverData) {
-    free(serverData->srvpath);
     free(serverData);
 }
 
 // Connection related functions ---------------------------------------------------------------
 
-int startServer(ServerData * serverData) {
-
-    /* Creating SRV FIFO */
-    unlink(serverData->srvpath);
-    mkfifo(serverData->srvpath, 0666);
-
-    open(serverData->srvpath, O_RDONLY | O_NONBLOCK);
-    
-    return 1;
+void initializeDataBase() {
+    dropTable();
+    startDatabase();
+    readTable(); //TODO: REMOVER AL ASEGURARSE QUE FUNCIONA TODO
 }
 
 int emptySpots(ServerData * serverData) {
@@ -78,7 +70,7 @@ void checkIncomingConnections(ServerData * serverData) {
     int i;
     for (i = 0; i < emptySpots(serverData); i++) {
         if (emptySpots(serverData) > 0) {
-            char * listened = comListen(serverData->srvpath);
+            ComAddress * listened = comListen(serverData->srvAddress);
             if (listened != NULL) {
                 printf("Connection detected\n");
                 addClient(comAccept(listened), serverData);
@@ -108,10 +100,7 @@ int disconnectClient(ServerData * serverData, int index) {
 }
 
 int hasBeenDisconnected(ServerData * serverData, int index) {
-    if( access(serverData->clientTable[index]->output, F_OK ) != -1 ) {
-        return 0;
-    }
-    return 1;
+    return !isConnected(serverData->clientTable[index]->output);
 }
 
 int checkConnection(ServerData * serverData, int index) {
@@ -207,7 +196,6 @@ void requestBetToPlayers(ServerData * serverData) {
             updateClientsOnIndex(serverData, index, SETUNACTIVE);
         }
     }
-    readTable();
 }
 
 int isBetValid(ServerData * serverData, int index, int bet) {
@@ -354,7 +342,7 @@ void dealInitialCards(ServerData * serverData) {
 
 void croupierPlay(ServerData * serverData) {
     updateClientsOnIndex(serverData, CROUPIER_SEAT, SETACTIVE);
-    while(serverData->gameTable->seats[CROUPIER_SEAT]->score < 17) {
+    while(serverData->gameTable->seats[CROUPIER_SEAT]->score < CROUPIER_MINSCORE) {
         deal(serverData, CROUPIER_SEAT);
     }
     updateClientsOnIndex(serverData, CROUPIER_SEAT, SETUNACTIVE);
@@ -363,13 +351,13 @@ void croupierPlay(ServerData * serverData) {
 
 void startRound(ServerData * serverData) {
     if (MAX_PLAYERS - emptySpots(serverData) > 0) {
-        readTable();
         if (hasDeckReachedLimit(serverData->deckIndex)) {
             shuffleDeck(serverData);
         }
         clearTable(serverData->gameTable);
         updateClientsOn(serverData, CLEARTABLE);
         requestBetToPlayers(serverData);
+        readTable(); //TODO: REMOVER AL ASEGURARSE QUE FUNCIONA BIEN
         dealInitialCards(serverData);
         askPlayersForHit(serverData);
         croupierPlay(serverData);

@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <sqlite3.h>
 #include "DBfnc.h"
 
 int printTable(void *unused, int argc, char **argv, char **azColName) {
