@@ -57,7 +57,6 @@ Connection * comAccept(Parameters * params) {
 
     /* Opening CLIENTOUT FD */
     connection->inputFD = open(connection->input, O_RDONLY | O_NONBLOCK);
-    printf("fffff\n");
 
     /* Writing CLIENTOUT FIFO PATH to Client */
     write(connection->outputFD, connection->input, MAX_BUF);

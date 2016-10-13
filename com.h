@@ -1,4 +1,4 @@
- #ifndef COM_H
+#ifndef COM_H
 #define COM_H
 
 #include <stdio.h>
