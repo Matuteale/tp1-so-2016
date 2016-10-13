@@ -41,12 +41,8 @@ Connection * comAccept(Parameters * params) {
 
     Connection * connection = newConnection();
 
-    printf("ggggg\n");
-    printf("%s\n", params->addr );
-    printf("gg2\n");
     /* Copying CLIENTIN FIFO PATH to Connection Output */
     strcpy(connection->output, params->addr);
-    printf("gg2\n");
 
     /* Opening OUTPUT (CLIENTIN) FD */
     connection->outputFD = open(connection->output, O_WRONLY);
