@@ -38,6 +38,10 @@ int DBGetSeatMoney(int seat) {
   }
   //Igualo el resultado a la primera columna de la fila de step, la query nos va a devolver una unica columna y fila
   int result = sqlite3_column_int(stmt, 0);
+  if(sqlite3_finalize(stmt) != SQLITE_OK){
+    printf("ERROR inserting data: %s\n", sqlite3_errmsg(db));
+    return -1;  
+  }
   return result;
 }
 
