@@ -13,7 +13,6 @@ int main() {
         deleteClientData(clientData);
     }
     clientData->gameTable = newTable();
-    clientData->balance = STARTING_MONEY;
 
     while(1) {
         clearScreen();

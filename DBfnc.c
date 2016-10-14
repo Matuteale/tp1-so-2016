@@ -52,7 +52,7 @@ sqlite3* DBOpen() {
   return db;
 }
 
-int DBCreateTable() {
+int DBCreateTable(int seats) {
   
   //Abro la db
   sqlite3* db;
@@ -74,7 +74,7 @@ int DBCreateTable() {
     return -1;
   }
 
-  for(i = 0; i < 8; i++) {
+  for(i = 0; i < seats; i++) {
     char sql[200];
     sprintf (sql, SQL_ADD_PLAYER, i);
     req = sqlite3_exec(db, sql, 0, 0, &err_msg);

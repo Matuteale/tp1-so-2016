@@ -10,7 +10,7 @@ int main() {
 
     openListener(serverData->srvAddress);
 
-    initializeDataBase();
+    startDatabase(MAX_PLAYERS);
     generateDeck(serverData);
     shuffleDeck(serverData);
 
@@ -34,12 +34,6 @@ void deleteServerData(ServerData * serverData) {
 }
 
 // Connection related functions ---------------------------------------------------------------
-
-void initializeDataBase() {
-    dropTable();
-    startDatabase();
-    readTable(); //TODO: REMOVER AL ASEGURARSE QUE FUNCIONA TODO
-}
 
 int emptySpots(ServerData * serverData) {
     int i;
@@ -83,7 +77,9 @@ void addClient(Connection * connection, ServerData * serverData) {
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
-    serverData->balance[index] = STARTING_MONEY;
+    changeSeatMoney(index, STARTING_MONEY);
+    updateBalance(serverData, index);
+    //serverData->balance[index] = STARTING_MONEY;
     printf("Client connected in spot %d.\n", index);
 }
 
@@ -95,6 +91,7 @@ int disconnectClient(ServerData * serverData, int index) {
     serverData->connectedBoolean[index] = 0;
     clearSeat(serverData->gameTable->seats[index]);
     updateClientsOnIndex(serverData, index, CLEARSEAT);
+    changeSeatMoney(index, 0);
     printf("Client in spot %d disconnected.\n", index); //DEBUG SERVER
     return 1;
 }
@@ -185,8 +182,8 @@ void requestBetToPlayers(ServerData * serverData) {
                 disconnectClient(serverData, index);
             } else {
                 //TODO: ACA DEBERIA INTERACTUAR CON LA BASE DE DATOS.
-                serverData->balance[index] -= bet;
-                changeSeatMoney(index, serverData->balance[index]);
+                //serverData->balance[index] -= bet;
+                changeSeatMoney(index, getMoney(index) - bet);
                 serverData->gameTable->seats[index]->currentBet = bet;
                 Bet * aux = newBet(bet,index);
                 updateClientsOnBet(serverData, aux);
@@ -196,21 +193,26 @@ void requestBetToPlayers(ServerData * serverData) {
             updateClientsOnIndex(serverData, index, SETUNACTIVE);
         }
     }
+    readTable(); //TODO: REMOVER
 }
 
 int isBetValid(ServerData * serverData, int index, int bet) {
     if (bet < 0) {
         return 0;
     }
-    if (serverData->balance[index] < bet) {
+    if (getMoney(index) < bet) {
         return 0;
     }
+    //if (serverData->balance[index] < bet) {
+    //    return 0;
+    //}
     return 1;
 }
 
 void updateBalance(ServerData * serverData, int index) {
     sendChar(serverData->clientTable[index], UPDATEBALANCE);
-    sendInt(serverData->clientTable[index], serverData->balance[index]);
+    sendInt(serverData->clientTable[index], getMoney(index));
+    //sendInt(serverData->clientTable[index], serverData->balance[index]);
 }
 
 char requestPlay(Connection * connection) {
@@ -309,15 +311,17 @@ void payWinners(ServerData * serverData) {
                     break;
                 }
                 case DRAW: {
-                    serverData->balance[i] +=
-                    serverData->gameTable->seats[i]->currentBet;
-                    changeSeatMoney(i, serverData->balance[i]);
+                    //serverData->balance[i] +=
+                    //serverData->gameTable->seats[i]->currentBet;
+                    changeSeatMoney(i, getMoney(i) +
+                        serverData->gameTable->seats[i]->currentBet);
                     break;
                 }
                 case WIN: {
-                    serverData->balance[i] +=
-                    (serverData->gameTable->seats[i]->currentBet *2);
-                    changeSeatMoney(i, serverData->balance[i]);
+                    //serverData->balance[i] +=
+                    //(serverData->gameTable->seats[i]->currentBet *2);
+                    changeSeatMoney(i, getMoney(i) +
+                        serverData->gameTable->seats[i]->currentBet*2);
                 }
             }
             updateBalance(serverData, i);
@@ -357,7 +361,6 @@ void startRound(ServerData * serverData) {
         clearTable(serverData->gameTable);
         updateClientsOn(serverData, CLEARTABLE);
         requestBetToPlayers(serverData);
-        readTable(); //TODO: REMOVER AL ASEGURARSE QUE FUNCIONA BIEN
         dealInitialCards(serverData);
         askPlayersForHit(serverData);
         croupierPlay(serverData);

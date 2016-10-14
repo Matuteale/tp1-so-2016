@@ -9,7 +9,7 @@
 #define SQL_SELECT_ALL "select * from Players;"
 #define SQL_GET_SEAT_MONEY "select Money from Players where Seat=%d;"
 #define SQL_CREATE_TABLE "CREATE TABLE Players(SEAT INT PRIMARY KEY NOT NULL, MONEY INT NOT NULL);"
-#define SQL_ADD_PLAYER "INSERT INTO Players VALUES(%d, 100);"
+#define SQL_ADD_PLAYER "INSERT INTO Players VALUES(%d, 0);"
 #define DATABASE_NAME "database.db"
 #define SQL_DROP_TABLE "DROP TABLE IF EXISTS 'Players' "
 #define SQL_UPDATE_PLAYER ("UPDATE Players SET Money='%d' WHERE Seat='%d'")
@@ -18,8 +18,8 @@
 int printRow(void *unused, int argc, char **argv, char **azColName);
 //Abre la base de datos
 sqlite3* DBOpen();
-//Crea una table con Seat Money, 8 filas que corresponden a cada asiento
-int DBCreateTable();
+//Crea una table con Seat Money.
+int DBCreateTable(int seats);
 //Funcion de validacion para el open
 int DBCheckTableExistance(sqlite3* db);
 //Tira abajo la tabla actual

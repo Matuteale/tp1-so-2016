@@ -20,7 +20,6 @@ void deleteServerData(ServerData * serverData);
 
 // Connection related functions ---------------------------------------------------------------
 
-void initializeDataBase();
 int emptySpots(ServerData * serverData);
 int firstEmptySpot(ServerData * serverData);
 void checkIncomingConnections(ServerData * serverData);
