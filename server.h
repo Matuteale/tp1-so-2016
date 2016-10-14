@@ -7,12 +7,11 @@
 
 typedef struct ServerData{
 	ComAddress * srvAddress;
-	Connection * clientTable[MAX_PLAYERS];
-    int connectedBoolean[MAX_PLAYERS];
+	Connection * clientTable[PLAYERS];
+    int connectedBoolean[PLAYERS];
     Table * gameTable;
     Card * deck[DECK_SIZE];
     int deckIndex;
-    int balance[MAX_PLAYERS];
 }ServerData;
 
 ServerData * newServerData();
@@ -20,6 +19,7 @@ void deleteServerData(ServerData * serverData);
 
 // Connection related functions ---------------------------------------------------------------
 
+void validateConfig();
 int emptySpots(ServerData * serverData);
 int firstEmptySpot(ServerData * serverData);
 void checkIncomingConnections(ServerData * serverData);

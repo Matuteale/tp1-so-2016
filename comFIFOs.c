@@ -1,7 +1,12 @@
 #include "com.h"
 #include "comFIFOs.h"
-#include "blackjacklib.h"
 
+#define MAX_BUF 1024
+#define MAX_PID_LENGTH 20
+
+// MSGS CODES
+#define SUCCESS "1"
+#define FAIL "0"
 
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));

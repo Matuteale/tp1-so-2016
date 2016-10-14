@@ -4,13 +4,15 @@
 
 int main() {
 
+    validateConfig();
+
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
     serverData->srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
     openListener(serverData->srvAddress);
 
-    startDatabase(MAX_PLAYERS);
+    startDatabase(PLAYERS);
     generateDeck(serverData);
     shuffleDeck(serverData);
 
@@ -35,11 +37,35 @@ void deleteServerData(ServerData * serverData) {
 
 // Connection related functions ---------------------------------------------------------------
 
+void validateConfig() {
+
+    if (DECK_PENETRATION < 0.1 || DECK_PENETRATION > 0.8) {
+        fprintf(stderr, "ERROR: INVALID DECK PENETRATION\n");
+        exit(-1);
+    }
+
+    if (STARTING_BALANCE % 1 != 0 || STARTING_BALANCE < 1) {
+        fprintf(stderr, "ERROR: INVALID STARTING BALANCE\n");
+        exit(-1);
+    }
+
+    if (PLAYING_DECKS % 1 != 0 || PLAYING_DECKS < 1) {
+        fprintf(stderr, "ERROR: INVALID DECKS AMOUNT\n");
+        exit(-1);
+    }
+
+    if (PLAYERS % 1 != 0 || PLAYERS < 1 || PLAYERS > (DECK_SIZE * (1.0 - DECK_PENETRATION))/5) {
+        fprintf(stderr, "ERROR: INVALID PLAYERS AMOUNT\n");
+        exit(-1);
+    }
+
+}
+
 int emptySpots(ServerData * serverData) {
     int i;
     int count = 0;
 
-    for (i = 0; i < MAX_PLAYERS; i++) {
+    for (i = 0; i < PLAYERS; i++) {
         if (serverData->connectedBoolean[i] == 0) {
             count++;
         }
@@ -51,7 +77,7 @@ int emptySpots(ServerData * serverData) {
 int firstEmptySpot(ServerData * serverData) {
     int i;
 
-    for (i = 0; i < MAX_PLAYERS; i++) {
+    for (i = 0; i < PLAYERS; i++) {
         if (serverData->connectedBoolean[i] == 0) {
             return i;
         }
@@ -77,9 +103,8 @@ void addClient(Connection * connection, ServerData * serverData) {
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
-    changeSeatMoney(index, STARTING_MONEY);
+    changeSeatMoney(index, STARTING_BALANCE);
     updateBalance(serverData, index);
-    //serverData->balance[index] = STARTING_MONEY;
     printf("Client connected in spot %d.\n", index);
 }
 
@@ -174,15 +199,13 @@ void requestBetToPlayers(ServerData * serverData) {
 
     int index;
 
-    for(index = 0; index < MAX_PLAYERS; index++) {
+    for(index = 0; index < PLAYERS; index++) {
         if (checkConnection(serverData, index)) {
             updateClientsOnIndex(serverData, index, SETACTIVE);
             int bet = requestBetTo(serverData, index);
             if (bet <= 0) {
                 disconnectClient(serverData, index);
             } else {
-                //TODO: ACA DEBERIA INTERACTUAR CON LA BASE DE DATOS.
-                //serverData->balance[index] -= bet;
                 changeSeatMoney(index, getMoney(index) - bet);
                 serverData->gameTable->seats[index]->currentBet = bet;
                 Bet * aux = newBet(bet,index);
@@ -203,16 +226,12 @@ int isBetValid(ServerData * serverData, int index, int bet) {
     if (getMoney(index) < bet) {
         return 0;
     }
-    //if (serverData->balance[index] < bet) {
-    //    return 0;
-    //}
     return 1;
 }
 
 void updateBalance(ServerData * serverData, int index) {
     sendChar(serverData->clientTable[index], UPDATEBALANCE);
     sendInt(serverData->clientTable[index], getMoney(index));
-    //sendInt(serverData->clientTable[index], serverData->balance[index]);
 }
 
 char requestPlay(Connection * connection) {
@@ -231,7 +250,7 @@ void askPlayersForHit(ServerData * serverData) {
 
     int index;
 
-    for(index = 0; index < MAX_PLAYERS; index++) {
+    for(index = 0; index < PLAYERS; index++) {
         if (checkConnection(serverData, index)) {
             updateClientsOnIndex(serverData, index, SETACTIVE);
             while(serverData->gameTable->seats[index]->score <= MAX_SCORE &&
@@ -255,7 +274,7 @@ void updateClientsOnDeal(ServerData * serverData, Deal * deal) {
 
     int index;
 
-    for(index = 0; index < MAX_PLAYERS; index++) {
+    for(index = 0; index < PLAYERS; index++) {
         if (checkConnection(serverData, index)) {
             sendChar(serverData->clientTable[index], DEAL);
             sendDeal(serverData->clientTable[index], deal);
@@ -267,7 +286,7 @@ void updateClientsOnBet(ServerData * serverData, Bet * bet) {
 
     int index;
 
-    for(index = 0; index < MAX_PLAYERS; index++) {
+    for(index = 0; index < PLAYERS; index++) {
         if (checkConnection(serverData, index)) {
             sendChar(serverData->clientTable[index], UPDATEBET);
             sendBet(serverData->clientTable[index], bet);
@@ -279,7 +298,7 @@ void updateClientsOn(ServerData * serverData, char action) {
 
     int i;
 
-    for(i = 0; i < MAX_PLAYERS; i++) {
+    for(i = 0; i < PLAYERS; i++) {
         if (checkConnection(serverData, i)) {
             sendChar(serverData->clientTable[i], action);
         }
@@ -290,7 +309,7 @@ void updateClientsOnIndex(ServerData * serverData, int index, char action) {
 
     int i;
 
-    for(i = 0; i < MAX_PLAYERS; i++) {
+    for(i = 0; i < PLAYERS; i++) {
         if (checkConnection(serverData, i)) {
             sendChar(serverData->clientTable[i], action);
             sendInt(serverData->clientTable[i], index);
@@ -302,7 +321,7 @@ void payWinners(ServerData * serverData) {
 
     int i;
 
-    for(i = 0; i < MAX_PLAYERS; i++) {
+    for(i = 0; i < PLAYERS; i++) {
         if (checkConnection(serverData, i)) {
             switch(hasWon(serverData->gameTable->seats[i], 
                 serverData->gameTable->seats[CROUPIER_SEAT]->score)) {
@@ -311,15 +330,11 @@ void payWinners(ServerData * serverData) {
                     break;
                 }
                 case DRAW: {
-                    //serverData->balance[i] +=
-                    //serverData->gameTable->seats[i]->currentBet;
                     changeSeatMoney(i, getMoney(i) +
                         serverData->gameTable->seats[i]->currentBet);
                     break;
                 }
                 case WIN: {
-                    //serverData->balance[i] +=
-                    //(serverData->gameTable->seats[i]->currentBet *2);
                     changeSeatMoney(i, getMoney(i) +
                         serverData->gameTable->seats[i]->currentBet*2);
                 }
@@ -336,7 +351,7 @@ void dealInitialCards(ServerData * serverData) {
     int i;
     int j;
     for (j = 0; j < 2; j++) {
-        for (i = 0; i < MAX_PLAYERS; i++) {
+        for (i = 0; i < PLAYERS; i++) {
             if (checkConnection(serverData, i)) {
                 deal(serverData, i);
             }
@@ -354,7 +369,7 @@ void croupierPlay(ServerData * serverData) {
 }
 
 void startRound(ServerData * serverData) {
-    if (MAX_PLAYERS - emptySpots(serverData) > 0) {
+    if (PLAYERS - emptySpots(serverData) > 0) {
         if (hasDeckReachedLimit(serverData->deckIndex)) {
             shuffleDeck(serverData);
         }

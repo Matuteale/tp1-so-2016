@@ -27,5 +27,5 @@ void dropTable() {
 }
 
 int getMoney(int seat) {
-	return DBGetSeatMoney(seat);
+	return DBGetSeatBalance(seat);
 }

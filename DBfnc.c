@@ -14,7 +14,7 @@ int printTable(void *unused, int argc, char **argv, char **azColName) {
   return 0;
 }
 
-int DBGetSeatMoney(int seat) {
+int DBGetSeatBalance(int seat) {
   //Abro la db
   sqlite3* db; 
   int rc = sqlite3_open(DATABASE_NAME, &db);
@@ -26,7 +26,7 @@ int DBGetSeatMoney(int seat) {
   //Armo la query que voy a correr con los valores ingresados
   char *err_msg = 0;
   char sql[200];
-  sprintf (sql, SQL_GET_SEAT_MONEY, seat);
+  sprintf (sql, SQL_GET_SEAT_BALANCE, seat);
   //Compilo la query para ser evaluada y poder usar sus valores
   sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
   //Evaluo la query, step solo devuelve una fila, pero la funcion se aplica para single values
@@ -135,7 +135,7 @@ int DBDropTable () {
 }
 
 
-int DBUpdatePlayer (int seat, int money) {
+int DBUpdatePlayer (int seat, int balance) {
   int rc;
   sqlite3* db = DBOpen();
   rc = DBCheckTableExistance(db);
@@ -148,7 +148,7 @@ int DBUpdatePlayer (int seat, int money) {
   char *err_msg = 0;
   //Genero la query con los valores ingresados
   char sql[200];
-  sprintf (sql, SQL_UPDATE_PLAYER, money, seat);
+  sprintf (sql, SQL_UPDATE_PLAYER, balance, seat);
   //Ejecuto la query
   rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -177,7 +177,7 @@ int DBReadTable () {
 
   char *err_msg = 0;
   //Ejecuto la query
-  printf("Seat\tMoney\n");
+  printf("Seat\tBalance\n");
   rc = sqlite3_exec(db, SQL_SELECT_ALL  , printTable, 0, &err_msg);
 
   if (rc != SQLITE_OK ) {

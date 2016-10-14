@@ -8,25 +8,21 @@
 #include <math.h>
 #include <limits.h>
 #include "database.h"
+#include "config.h"
 
 #define CLOCK 200000
 
 #define CARDS_PER_DECK 52
-#define PLAYING_DECKS 6
 #define DECK_SIZE (CARDS_PER_DECK * PLAYING_DECKS)
-#define DECK_PENETRATION 0.8
 #define SUITS 4
 #define MAX_SCORE 21
-#define STARTING_MONEY 100
 #define CROUPIER_MINSCORE 17
 
 #define MAX_BUF 1024
 #define MAX_PATH 64
-#define MAX_PID_LENGTH 20
-#define MAX_PLAYERS 4
 #define MAX_CARDSINHAND 22
 #define MAX_DIGITS floor(log10(abs(INT_MAX)))
-#define CROUPIER_SEAT MAX_PLAYERS
+#define CROUPIER_SEAT PLAYERS
 
 #define LOSE -1
 #define DRAW 0
@@ -62,7 +58,7 @@ typedef struct Seat{
 }Seat;
 
 typedef struct Table{
-	Seat * seats[MAX_PLAYERS+1];
+	Seat * seats[PLAYERS+1];
 }Table;
 
 typedef struct Deal{
@@ -106,6 +102,7 @@ char * getStr(int size);
 int getInt(int size);
 int charToInt(char c);
 int strToInt(char * str);
+char toUpper(char c);
 void clearSTDIN();
 int randInt(int limitInclusive);
 void shuffle(void ** array, int size);

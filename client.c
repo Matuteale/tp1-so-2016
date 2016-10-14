@@ -144,7 +144,10 @@ void play(ClientData * clientData) {
     do {
         printf("Enter an action:  'H' | HIT -- 'S' | STAND\n");
         ans = getStr(1);
-    } while(strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0);
+        if (ans != NULL) {
+            ans[0] = toUpper(ans[0]);
+        }
+    } while(ans == NULL || (strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0));
 
     sendStr(clientData->serverConnection, ans);
 }
