@@ -15,7 +15,7 @@ Seat * newSeat() {
 Table * newTable() {
 	int i;
 	Table * aux = malloc(sizeof(Table));
-	for(i = 0; i < MAX_PLAYERS + 1; i++) {
+	for(i = 0; i < PLAYERS + 1; i++) {
 		aux->seats[i] = newSeat();
 	}
 	return aux;
@@ -46,7 +46,7 @@ void deleteSeat(Seat * seat) {
 
 void deleteTable(Table * table) {
 	int i;
-	for (i = 0; i < MAX_PLAYERS+1; i++) {
+	for (i = 0; i < PLAYERS+1; i++) {
 		deleteSeat(table->seats[i]);
 	}
 	free(table);
@@ -100,7 +100,7 @@ void clearSeat(Seat * seat) {
 
 void clearTable(Table * table) {
 	int i;
-	for (i = 0; i < MAX_PLAYERS+1; i++) {
+	for (i = 0; i < PLAYERS+1; i++) {
 		clearSeat(table->seats[i]);
 	}
 }
@@ -147,6 +147,19 @@ int hasDeckReachedLimit(int deckIndex) {
 		> ((double)(DECK_PENETRATION)) );
 }
 
+int hasWon(Seat * seat, int croupierScore) {
+    if (seat->score > MAX_SCORE) {
+        return LOSE;
+    }
+    if (seat->score < croupierScore && croupierScore <= MAX_SCORE ) {
+        return LOSE;
+    }
+    if (seat->score == croupierScore) {
+    	return DRAW;
+    }
+    return WIN;
+}
+
 void showTable(Table * table) {
 
 	Seat * crSeat = table->seats[CROUPIER_SEAT];
@@ -164,7 +177,7 @@ void showTable(Table * table) {
 	printf("SCORE: %d  ", crSeat->score);
 	printf("\n\n\n");
 
-	for (j = 0; j < MAX_PLAYERS; j++) {
+	for (j = 0; j < PLAYERS; j++) {
 		Seat * seat = table->seats[j];
 		if (seat->isActive == 1)
 			printf("PLAYING >>> ");
@@ -216,7 +229,7 @@ char * getStr(int size) {
 	char c;
 	int i;
 
-	for (i = 0; i < size+1 && (c = getchar()) != '\n' ; i++) {
+	for (i = 0; i <= size && (c = getchar()) != '\n' ; i++) {
 		aux[i] = c;
 	}
 
@@ -274,6 +287,13 @@ int strToInt(char * str) {
 	}
 
 	return aux;
+}
+
+char toUpper(char c) {
+	if (c >= 'a' && c <= 'z') {
+		return c - 'a' + 'A';
+	}
+	return c;
 }
 
 void clearSTDIN() {

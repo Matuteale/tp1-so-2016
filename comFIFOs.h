@@ -2,10 +2,14 @@
 #define COMFIFOS_H
 
 typedef struct Connection {
-    char * input; //READ
-    char * output; //WRITE
+    ComAddress * input; //READ
+    ComAddress * output; //WRITE
     int inputFD;
     int outputFD;
+};
+
+typedef struct ComAddress {
+    char * path;
 };
 
 #endif

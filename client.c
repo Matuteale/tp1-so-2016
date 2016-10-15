@@ -1,21 +1,28 @@
 #include "blackjacklib.h"
 #include "client.h"
 
+ClientData * clientData;
+
 int main() {
 
-    char * srvaddr = malloc(sizeof(SRV_PATH));
+    ComAddress * srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
-    ClientData * clientData = newClientData();
+    clientData = newClientData();
 
-    strcpy(srvaddr, SRV_PATH);
-    clientData->serverConnection = comConnect(srvaddr);
+    signal(SIGINT, disconnectClient);
+
+    clientData->serverConnection = comConnect(srvAddress);
+
+    if (clientData->serverConnection == NULL) {
+        deleteClientData(clientData);
+    }
     clientData->gameTable = newTable();
-    clientData->balance = STARTING_MONEY;
 
     while(1) {
         clearScreen();
         showTable(clientData->gameTable);
         waitForServer(clientData);
+        usleep(CLOCK);
     }
 
     return 0;
@@ -38,17 +45,19 @@ void askToQuit(ClientData * clientData) {
     while(!feof(stdin)) {
         if ((c = getchar()) == 'q') {
             if ((c = getchar()) == '\n') {
-                disconnectClient(clientData);
+                disconnectClient();
             }
         }
         while((c = getchar()) != '\n' && !feof(stdin));
     }
 }
 
-void disconnectClient(ClientData * clientData) {
+void disconnectClient() {
+    printf("\n");
     disconnect(clientData->serverConnection);
     deleteTable(clientData->gameTable);
     deleteClientData(clientData);
+    printf("Closing Client..\n");
     exit(1);
 }
 
@@ -117,7 +126,7 @@ void bet(ClientData * clientData) {
             if(str[0] == 'q' && str[1] == '\0' ) {
                 free(str);
                 sendInt(clientData->serverConnection, 0);
-                disconnectClient(clientData);
+                disconnectClient();
             }
 
             int value = strToInt(str);
@@ -141,7 +150,10 @@ void play(ClientData * clientData) {
     do {
         printf("Enter an action:  'H' | HIT -- 'S' | STAND\n");
         ans = getStr(1);
-    } while(strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0);
+        if (ans != NULL) {
+            ans[0] = toUpper(ans[0]);
+        }
+    } while(ans == NULL || (strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0));
 
     sendStr(clientData->serverConnection, ans);
 }
@@ -169,9 +181,7 @@ void shuffleAction(ClientData * clientData) {
 
     printf("Deck is being Shuffled ...");
 
-    clearTableAction(clientData);
-
-    //TODO: VER SI AGREGAR UN WAIT DE 3 SEGUNDOS ROMPE ALGO. ES SOLO ESTETICO.
+    sleep(SCREEN_TIME); //SOLO ESTETICO
 }
 
 void setActiveAction(ClientData * clientData) {

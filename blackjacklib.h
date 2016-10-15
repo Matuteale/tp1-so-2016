@@ -4,28 +4,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <math.h>
 #include <limits.h>
+#include <signal.h>
+#include "database.h"
+#include "config.h"
 
-#define CLOCK 100000
+#define CLOCK 200000	//Determina el clock del cliente al que se realizan todas las jugadas.(microseg)
+#define SCREEN_TIME 3	//Tiempo que queda en sleep el cliente al terminar la ronda (seg).
 
 #define CARDS_PER_DECK 52
-#define PLAYING_DECKS 6
 #define DECK_SIZE (CARDS_PER_DECK * PLAYING_DECKS)
-#define DECK_PENETRATION 0.8
 #define SUITS 4
 #define MAX_SCORE 21
-#define STARTING_MONEY 100
+#define CROUPIER_MINSCORE 17
 
-#define SRV_PATH "/tmp/srv\0"
 #define MAX_BUF 1024
 #define MAX_PATH 64
-#define MAX_PID_LENGTH 20
-#define MAX_PLAYERS 4
 #define MAX_CARDSINHAND 22
 #define MAX_DIGITS floor(log10(abs(INT_MAX)))
-#define CROUPIER_SEAT MAX_PLAYERS
+#define CROUPIER_SEAT PLAYERS
+
+#define LOSE -1
+#define DRAW 0
+#define WIN 1
 
 // MSGS CODES
 #define SUCCESS "1"
@@ -57,7 +62,7 @@ typedef struct Seat{
 }Seat;
 
 typedef struct Table{
-	Seat * seats[MAX_PLAYERS+1];
+	Seat * seats[PLAYERS+1];
 }Table;
 
 typedef struct Deal{
@@ -90,6 +95,7 @@ int hasAce(Seat * seat);
 void setActive(Seat * seat);
 void setUnActive(Seat * seat);
 int hasDeckReachedLimit(int deckIndex);
+int hasWon(Seat * seat, int croupierScore);
 void showTable(Table * table);
 void clearScreen();
 
@@ -100,6 +106,7 @@ char * getStr(int size);
 int getInt(int size);
 int charToInt(char c);
 int strToInt(char * str);
+char toUpper(char c);
 void clearSTDIN();
 int randInt(int limitInclusive);
 void shuffle(void ** array, int size);

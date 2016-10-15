@@ -12,6 +12,10 @@ typedef struct Connection
 	in_port_t port; // equivalente a uint16_t
 	int socketFD;
 };
+typedef struct ComAddress {
+    char * path;
+    int socketFD;
+};
 
 
 /** Address format xxx.xxx.xxx.xxx:PPPPP **/
