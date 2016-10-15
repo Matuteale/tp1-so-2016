@@ -1,11 +1,15 @@
 #include "blackjacklib.h"
 #include "client.h"
 
+ClientData * clientData;
+
 int main() {
 
     ComAddress * srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
-    ClientData * clientData = newClientData();
+    clientData = newClientData();
+
+    signal(SIGINT, disconnectClient);
 
     clientData->serverConnection = comConnect(srvAddress);
 
@@ -41,17 +45,19 @@ void askToQuit(ClientData * clientData) {
     while(!feof(stdin)) {
         if ((c = getchar()) == 'q') {
             if ((c = getchar()) == '\n') {
-                disconnectClient(clientData);
+                disconnectClient();
             }
         }
         while((c = getchar()) != '\n' && !feof(stdin));
     }
 }
 
-void disconnectClient(ClientData * clientData) {
+void disconnectClient() {
+    printf("\n");
     disconnect(clientData->serverConnection);
     deleteTable(clientData->gameTable);
     deleteClientData(clientData);
+    printf("Closing Client..\n");
     exit(1);
 }
 
@@ -120,7 +126,7 @@ void bet(ClientData * clientData) {
             if(str[0] == 'q' && str[1] == '\0' ) {
                 free(str);
                 sendInt(clientData->serverConnection, 0);
-                disconnectClient(clientData);
+                disconnectClient();
             }
 
             int value = strToInt(str);
@@ -175,7 +181,7 @@ void shuffleAction(ClientData * clientData) {
 
     printf("Deck is being Shuffled ...");
 
-    sleep(3); //SOLO ESTETICO
+    sleep(SCREEN_TIME); //SOLO ESTETICO
 }
 
 void setActiveAction(ClientData * clientData) {

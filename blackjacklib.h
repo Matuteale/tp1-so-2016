@@ -4,13 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <math.h>
 #include <limits.h>
+#include <signal.h>
 #include "database.h"
 #include "config.h"
 
-#define CLOCK 200000
+#define CLOCK 200000	//Determina el clock del cliente al que se realizan todas las jugadas.(microseg)
+#define SCREEN_TIME 3	//Tiempo que queda en sleep el cliente al terminar la ronda (seg).
 
 #define CARDS_PER_DECK 52
 #define DECK_SIZE (CARDS_PER_DECK * PLAYING_DECKS)

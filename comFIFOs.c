@@ -72,7 +72,7 @@ Connection * comAccept(ComAddress * addressToAccept) {
     mkfifo(connection->input->path, 0666);
 
     /* Opening CLIENTOUT FD */
-    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input->path, O_RDWR);
 
     /* Writing CLIENTOUT FIFO PATH to Client */
     write(connection->outputFD, connection->input->path, MAX_BUF);
@@ -123,7 +123,7 @@ Connection * comConnect(ComAddress * address) {
     outputAuxFD = open(address->path, O_WRONLY);
 
     /* Opening INPUT FD */
-    connection->inputFD = open(connection->input->path, O_RDONLY | O_NONBLOCK);
+    connection->inputFD = open(connection->input->path, O_RDWR);
 
     /* Writing INPUT FIFO PATH to AUX OUTPUT FD, requesting a connection */
     write(outputAuxFD, connection->input->path, MAX_BUF);
@@ -185,12 +185,9 @@ int comRead(Connection * connection, char * dataToRead, int size) {
 
     int ret;
 
-    while(ret = read(connection->inputFD, dataToRead, size) <= 0);
-    
-    return ret;
+    return read(connection->inputFD, dataToRead, size);
 }
 
-//TODO: Decidir si hacemos que retorne int segun si desconecta correctamente o lo dejamos asi
 void disconnect(Connection * connection) {
     close(connection->inputFD);
     close(connection->outputFD);

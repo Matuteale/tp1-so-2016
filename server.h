@@ -19,7 +19,6 @@ void deleteServerData(ServerData * serverData);
 
 // Connection related functions ---------------------------------------------------------------
 
-void validateConfig();
 int emptySpots(ServerData * serverData);
 int firstEmptySpot(ServerData * serverData);
 void checkIncomingConnections(ServerData * serverData);
@@ -28,6 +27,8 @@ int disconnectClient(ServerData * serverData, int index);
 int hasBeenDisconnected(ServerData * serverData, int index);
 int checkConnection(ServerData * serverData, int index);
 void checkCurrentConnections(ServerData * serverData);
+void closeServer();
+void validateConfig();
 
 // Game related functions ----------------------------------------------------------------------
 

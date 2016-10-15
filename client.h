@@ -15,7 +15,7 @@ ClientData * newClientData();
 
 void deleteClientData(ClientData * clientData);
 void askToQuit(ClientData * clientData);
-void disconnectClient(ClientData * clientData);
+void disconnectClient();
 void waitForServer(ClientData * clientData);
 void bet(ClientData * clientData);
 void play(ClientData * clientData);

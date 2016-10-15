@@ -2,13 +2,17 @@
 #include "server.h"
 #include <sys/types.h>
 
+ServerData * serverData;
+
 int main() {
 
     validateConfig();
 
-    ServerData * serverData = newServerData();
+    serverData = newServerData();
     serverData->gameTable = newTable();
     serverData->srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
+
+    signal(SIGINT, closeServer);
 
     openListener(serverData->srvAddress);
 
@@ -28,6 +32,7 @@ int main() {
 ServerData * newServerData() {
     ServerData * serverData = malloc(sizeof(ServerData));
     memset(serverData->connectedBoolean, 0, sizeof(serverData->connectedBoolean));
+
     return serverData;
 }
 
@@ -36,30 +41,6 @@ void deleteServerData(ServerData * serverData) {
 }
 
 // Connection related functions ---------------------------------------------------------------
-
-void validateConfig() {
-
-    if (DECK_PENETRATION < 0.1 || DECK_PENETRATION > 0.8) {
-        fprintf(stderr, "ERROR: INVALID DECK PENETRATION\n");
-        exit(-1);
-    }
-
-    if (STARTING_BALANCE % 1 != 0 || STARTING_BALANCE < 1) {
-        fprintf(stderr, "ERROR: INVALID STARTING BALANCE\n");
-        exit(-1);
-    }
-
-    if (PLAYING_DECKS % 1 != 0 || PLAYING_DECKS < 1) {
-        fprintf(stderr, "ERROR: INVALID DECKS AMOUNT\n");
-        exit(-1);
-    }
-
-    if (PLAYERS % 1 != 0 || PLAYERS < 1 || PLAYERS > (DECK_SIZE * (1.0 - DECK_PENETRATION))/5) {
-        fprintf(stderr, "ERROR: INVALID PLAYERS AMOUNT\n");
-        exit(-1);
-    }
-
-}
 
 int emptySpots(ServerData * serverData) {
     int i;
@@ -140,6 +121,40 @@ void checkCurrentConnections(ServerData * serverData) {
     int i;
     for (i = 0; i < emptySpots(serverData); i++) {
         checkConnection(serverData, i);
+    }
+}
+
+void closeServer() {
+    int i;
+    printf("\n");
+    for (i = 0; i < PLAYERS; i++) {
+        disconnectClient(serverData, i);
+    }
+    deleteServerData(serverData);
+    printf("Closing Server..\n");
+    exit(1);
+}
+
+void validateConfig() {
+
+    if (DECK_PENETRATION < 0.1 || DECK_PENETRATION > 0.8) {
+        fprintf(stderr, "ERROR: INVALID DECK PENETRATION\n");
+        exit(-1);
+    }
+
+    if (STARTING_BALANCE % 1 != 0 || STARTING_BALANCE < 1) {
+        fprintf(stderr, "ERROR: INVALID STARTING BALANCE\n");
+        exit(-1);
+    }
+
+    if (PLAYING_DECKS % 1 != 0 || PLAYING_DECKS < 1) {
+        fprintf(stderr, "ERROR: INVALID DECKS AMOUNT\n");
+        exit(-1);
+    }
+
+    if (PLAYERS % 1 != 0 || PLAYERS < 1 || PLAYERS > (DECK_SIZE * (1.0 - DECK_PENETRATION))/5) {
+        fprintf(stderr, "ERROR: INVALID PLAYERS AMOUNT\n");
+        exit(-1);
     }
 }
 
