@@ -60,16 +60,16 @@ void deleteServerData(ServerData * serverData) {
 int startServer(ServerData * serverData) {
 
     /* Creating SRV FIFO */
-    unlink(serverData->srvpath);
-    mkfifo(serverData->srvpath, 0666);
+    unlink(serverData->srvAddress->path);
+    mkfifo(serverData->srvAddress->path, 0666);
 
     logging("Opening server path...", 1);
-    if(open(serverData->srvpath, O_RDONLY | O_NONBLOCK) < 0){
+    if(open(serverData->srvAddress->path, O_RDONLY | O_NONBLOCK) < 0){
         logging(strerror(errno), 3);
         return -1;
-    }else{
-        logging("Server path successfully opened.", 1);
     }
+    logging("Server path successfully opened.", 1);
+
     return 0;
 }
 
