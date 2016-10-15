@@ -18,13 +18,13 @@ int main() {
         }
 
         if(rbuf.mtype == 1){ // Info
-            printf("Info: %s\n", rbuf.mtext);
+            printf("[Info]: %s\n", rbuf.mtext);
         }
         if(rbuf.mtype == 2){ // Warning
-            printf("Warning: %s\n", rbuf.mtext);
+            printf("[Warning]: %s\n", rbuf.mtext);
         }
         if(rbuf.mtype == 3){ // Error
-            printf("Error: %s\n", rbuf.mtext);
+            printf("[Error]: %s\n", rbuf.mtext);
         }
 
 

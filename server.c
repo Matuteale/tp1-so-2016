@@ -15,14 +15,14 @@ int main() {
     serverData->srvAddress = newComAddress(readStrFromFile("SERVERPATH.txt"));
 
     logging("Starting server...", 1);
-    if(startServer(serverData) < 0){
+    if(openListener(serverData->srvAddress) < 0){
+        logging(strerror(errno), 3);
         logging("Could not start server, exiting...", 3);
         exit(0);
     }
     logging("Server started.", 1);
-    signal(SIGINT, closeServer);
 
-    openListener(serverData->srvAddress);
+    signal(SIGINT, closeServer);
 
     startDatabase(PLAYERS);
     generateDeck(serverData);

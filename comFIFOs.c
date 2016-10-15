@@ -156,11 +156,15 @@ Connection * comConnect(ComAddress * address) {
     return NULL;
 }
 
-void openListener(ComAddress * address) {
+int openListener(ComAddress * address) {
     unlink(address->path);
     mkfifo(address->path, 0666);
+    if(open(address->path, O_RDONLY | O_NONBLOCK) < 0){
+        return -1;
+    }
 
-    open(address->path, O_RDONLY | O_NONBLOCK);
+    return 0;
+
 }
 
 void closeListener(ComAddress * address) {

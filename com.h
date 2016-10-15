@@ -18,7 +18,7 @@ void deleteComAddress(ComAddress * address);
 Connection * comConnect(ComAddress * address);
 ComAddress * comListen(ComAddress * address);
 Connection * comAccept(ComAddress * addressToAccept);
-void openListener(ComAddress * address);
+int openListener(ComAddress * address);
 void closeListener(ComAddress * address);
 int isConnected(ComAddress * address);
 int comWrite(Connection * connection, char * dataToWrite, int size);
