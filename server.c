@@ -1,14 +1,21 @@
 #include "blackjacklib.h"
 #include "server.h"
-#include <sys/types.h>
+#include "logging.h"
 
 int main() {
+    msgctl(msgget(key, msgflg), IPC_RMID, NULL); //Deletes de msg queue
+    msqid = msgget(key, msgflg);
 
     ServerData * serverData = newServerData();
     serverData->gameTable = newTable();
     serverData->srvpath = readStrFromFile("SERVERPATH.txt");
 
-    startServer(serverData);
+    logging("Starting server...", 1);
+    if(startServer(serverData) < 0){
+        logging("Could not start server, exiting...", 3);
+        exit(0);
+    }
+    logging("Server started.", 1);
 
     generateDeck(serverData);
     shuffleDeck(serverData);
@@ -20,6 +27,13 @@ int main() {
     }
 
     return 0;
+}
+
+void logging(char * msg, int type){
+    message_buf sbuf;
+    sbuf.mtype = type;
+    (void) strcpy(sbuf.mtext, msg);
+    msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, IPC_NOWAIT);
 }
 
 ServerData * newServerData() {
@@ -42,9 +56,14 @@ int startServer(ServerData * serverData) {
     unlink(serverData->srvpath);
     mkfifo(serverData->srvpath, 0666);
 
-    open(serverData->srvpath, O_RDONLY | O_NONBLOCK);
-    
-    return 1;
+    logging("Opening server path...", 1);
+    if(open(serverData->srvpath, O_RDONLY | O_NONBLOCK) < 0){
+        logging(strerror(errno), 3);
+        return -1;
+    }else{
+        logging("Server path successfully opened.", 1);
+    }
+    return 0;
 }
 
 int emptySpots(ServerData * serverData) {
