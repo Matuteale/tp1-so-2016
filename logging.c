@@ -2,6 +2,12 @@
 
 #include "logging.h"
 #include <stdio.h>
+#include <signal.h>
+
+void closeLogging();
+
+FILE * fp;
+
 
 int main() {
     int msgQueueId;
@@ -10,13 +16,12 @@ int main() {
         perror("msgget");
         exit(1);
     }
-    FILE * fp;
 
     fp = fopen("/tmp/log.txt", "w+" );
 
-    while(msgrcv(msgQueueId, &rbuf, MSG_SIZE, 0, 0) >= 0){
+    signal(SIGINT, closeLogging);
 
-        fp = fopen("/tmp/log.txt", "a+" );
+    while(msgrcv(msgQueueId, &rbuf, MSG_SIZE, 0, 0) >= 0){
 
         if(rbuf.mtype == 1){ // Info
             printf("[Info]: %s\n", rbuf.mtext);
@@ -36,9 +41,16 @@ int main() {
             fputs(rbuf.mtext, fp);
             fputs("\n", fp);
         }
-        fclose(fp);
     }
     perror("msgrcv");
     fclose(fp);
 }
 
+void closeLogging(){
+    fputs("[Info]: Closing logging...\n", fp);
+    fputs("[Info]: Logging closed.", fp);
+    fclose(fp);
+    printf("\nClosing logging...\n");
+    printf("Logging closed.\n");
+    exit(1);
+}
