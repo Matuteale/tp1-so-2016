@@ -20,7 +20,7 @@ ComAddress * comListen(ComAddress * address);
 Connection * comAccept(ComAddress * addressToAccept);
 int openListener(ComAddress * address);
 void closeListener(ComAddress * address);
-int isConnected(ComAddress * address);
+int isConnected(Connection * connection);
 int comWrite(Connection * connection, char * dataToWrite, int size);
 int comRead(Connection * connection, char * dataToRead, int size);
 void disconnect(Connection * connection);

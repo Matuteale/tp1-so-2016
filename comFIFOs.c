@@ -172,8 +172,8 @@ void closeListener(ComAddress * address) {
     unlink(address->path);
 }
 
-int isConnected(ComAddress * address) {
-    if( access(address->path, F_OK ) != -1 ) {
+int isConnected(Connection * connection) {
+    if( access(connection->output->path, F_OK ) != -1 ) {
         return 1;
     }
     return 0;

@@ -125,7 +125,7 @@ int disconnectClient(ServerData * serverData, int index) {
 }
 
 int hasBeenDisconnected(ServerData * serverData, int index) {
-    return !isConnected(serverData->clientTable[index]->output);
+    return !isConnected(serverData->clientTable[index]);
 }
 
 int checkConnection(ServerData * serverData, int index) {
