@@ -50,7 +50,7 @@ void closeLogging(){
     fputs("[Info]: Closing logging...\n", fp);
     fputs("[Info]: Logging closed.", fp);
     fclose(fp);
-    printf("\nClosing logging...\n");
-    printf("Logging closed.\n");
+    printf("\n[Info]: Closing logging...\n");
+    printf("[Info]: Logging closed.\n");
     exit(1);
 }

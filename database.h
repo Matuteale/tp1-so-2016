@@ -4,7 +4,7 @@
 #include "blackjacklib.h"
 #include "DBfnc.h"
 
-void startDatabase(int seats);
+int startDatabase(int seats);
 void readTable();
 void changeSeatMoney(int seat, int moneyToChange);
 void dropTable();

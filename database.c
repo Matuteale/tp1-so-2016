@@ -7,11 +7,13 @@
 #include <time.h>
 #include "DBfnc.h"
 
-void startDatabase(int seats) {
+int startDatabase(int seats) {
 	dropTable();
 	if (DBCreateTable(seats) == -1) {
-    	fprintf(stderr, "ERROR: DataBase Table couldn't be created.\n");
+    	fprintf(stderr, "[Warning]: DataBase Table couldn't be created.\n");
+    	return -1;
     }
+    return 0;
 }
 
 void readTable() {

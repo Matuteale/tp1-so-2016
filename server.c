@@ -24,7 +24,14 @@ int main() {
 
     signal(SIGINT, closeServer);
 
-    startDatabase(PLAYERS);
+    logging("Creating database...", 1);
+    if(startDatabase(PLAYERS) < 0){
+        logging("DataBase Table couldn't be created.", 2);
+        logging("Now working on local memory.", 2);
+    }else{
+        logging("Database created.", 1);
+    }
+
     generateDeck(serverData);
     shuffleDeck(serverData);
 
@@ -56,22 +63,6 @@ void deleteServerData(ServerData * serverData) {
 }
 
 // Connection related functions ---------------------------------------------------------------
-
-int startServer(ServerData * serverData) {
-
-    /* Creating SRV FIFO */
-    unlink(serverData->srvAddress->path);
-    mkfifo(serverData->srvAddress->path, 0666);
-
-    logging("Opening server path...", 1);
-    if(open(serverData->srvAddress->path, O_RDONLY | O_NONBLOCK) < 0){
-        logging(strerror(errno), 3);
-        return -1;
-    }
-    logging("Server path successfully opened.", 1);
-
-    return 0;
-}
 
 int emptySpots(ServerData * serverData) {
     int i;
@@ -168,25 +159,36 @@ void closeServer() {
 
 void validateConfig() {
 
+    logging("Validating configuration...", 1);
+
     if (DECK_PENETRATION < 0.1 || DECK_PENETRATION > 0.8) {
         fprintf(stderr, "ERROR: INVALID DECK PENETRATION\n");
+        logging("INVALID DECK PENETRATION", 3);
+        logging("Could not continue, exiting...", 3);
         exit(-1);
     }
 
     if (STARTING_BALANCE % 1 != 0 || STARTING_BALANCE < 1) {
         fprintf(stderr, "ERROR: INVALID STARTING BALANCE\n");
+        logging("INVALID STARTING BALANCE", 3);
+        logging("Could not continue, exiting...", 3);
         exit(-1);
     }
 
     if (PLAYING_DECKS % 1 != 0 || PLAYING_DECKS < 1) {
         fprintf(stderr, "ERROR: INVALID DECKS AMOUNT\n");
+        logging("IINVALID DECKS AMOUNT", 3);
+        logging("Could not continue, exiting...", 3);
         exit(-1);
     }
 
     if (PLAYERS % 1 != 0 || PLAYERS < 1 || PLAYERS > (DECK_SIZE * (1.0 - DECK_PENETRATION))/5) {
         fprintf(stderr, "ERROR: INVALID PLAYERS AMOUNT\n");
+        logging("INVALID PLAYERS AMOUNT", 3);
+        logging("Could not continue, exiting...", 3);
         exit(-1);
     }
+    logging("Configuration validated.", 1);
 }
 
 // Game related functions ----------------------------------------------------------------------
