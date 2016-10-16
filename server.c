@@ -120,6 +120,13 @@ int disconnectClient(ServerData * serverData, int index) {
     clearSeat(serverData->gameTable->seats[index]);
     updateClientsOnIndex(serverData, index, CLEARSEAT);
     changeSeatMoney(index, 0);
+    char msg[30];
+    char str[3];
+    sprintf(str, "%d", index);
+    strcpy(msg, "Client ");
+    strcat(msg, str);
+    strcat(msg, " disconnected.");
+    logging(msg, 1);
     printf("Client in spot %d disconnected.\n", index); //DEBUG SERVER
     return 1;
 }
@@ -131,6 +138,7 @@ int hasBeenDisconnected(ServerData * serverData, int index) {
 int checkConnection(ServerData * serverData, int index) {
     if (serverData->connectedBoolean[index] == 1) {
         if (hasBeenDisconnected(serverData, index)) {
+            logging("Disconnecting client...", 1);
             disconnectClient(serverData, index);
             return 0;
         }
@@ -150,9 +158,12 @@ void closeServer() {
     int i;
     printf("\n");
     for (i = 0; i < PLAYERS; i++) {
+        logging("Disconnecting client...", 1);
         disconnectClient(serverData, i);
     }
+    logging("Closing server...", 1);
     deleteServerData(serverData);
+    logging("Server closed", 1);
     printf("Closing Server..\n");
     exit(1);
 }
