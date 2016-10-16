@@ -1,56 +1,13 @@
-//Basado en las instrucciones de https://users.cs.cf.ac.uk/Dave.Marshall/C/node25.html
-
 #include "logging.h"
-#include <stdio.h>
-#include <signal.h>
 
-void closeLogging();
-
-FILE * fp;
-
-
-int main() {
-    int msgQueueId;
-    message_buf  rbuf;
-    if ((msgQueueId = msgget(key, 0666)) < 0) {
-        perror("msgget");
-        exit(1);
-    }
-
-    fp = fopen("/tmp/log.txt", "w+" );
-
-    signal(SIGINT, closeLogging);
-
-    while(msgrcv(msgQueueId, &rbuf, MSG_SIZE, 0, 0) >= 0){
-
-        if(rbuf.mtype == 1){ // Info
-            printf("[Info]: %s\n", rbuf.mtext);
-            fputs("[Info]: ", fp);
-            fputs(rbuf.mtext, fp);
-            fputs("\n", fp);
-        }
-        if(rbuf.mtype == 2){ // Warning
-            printf("[Warning]: %s\n", rbuf.mtext);
-            fputs("[Warning]: ", fp);
-            fputs(rbuf.mtext, fp);
-            fputs("\n", fp);
-        }
-        if(rbuf.mtype == 3){ // Error
-            printf("[Error]: %s\n", rbuf.mtext);
-            fputs("[Error]: ", fp);
-            fputs(rbuf.mtext, fp);
-            fputs("\n", fp);
-        }
-    }
-    perror("msgrcv");
-    fclose(fp);
+void createLoggingSystem(){
+	msgctl(msgget(key, msgflg), IPC_RMID, NULL); //Deletes de msg queue
+    msqid = msgget(key, msgflg);
 }
 
-void closeLogging(){
-    fputs("[Info]: Closing logging...\n", fp);
-    fputs("[Info]: Logging closed.", fp);
-    fclose(fp);
-    printf("\n[Info]: Closing logging...\n");
-    printf("[Info]: Logging closed.\n");
-    exit(1);
+void logging(char * msg, int type){
+    message_buf sbuf;
+    sbuf.mtype = type;
+    (void) strcpy(sbuf.mtext, msg);
+    msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, IPC_NOWAIT);
 }

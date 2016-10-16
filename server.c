@@ -1,12 +1,11 @@
 #include "blackjacklib.h"
 #include "server.h"
-#include "logging.h"
 
 ServerData * serverData;
 
 int main() {
-    msgctl(msgget(key, msgflg), IPC_RMID, NULL); //Deletes de msg queue
-    msqid = msgget(key, msgflg);
+
+    createLoggingSystem();
 
     validateConfig();
 
@@ -42,13 +41,6 @@ int main() {
     }
 
     return 0;
-}
-
-void logging(char * msg, int type){
-    message_buf sbuf;
-    sbuf.mtype = type;
-    (void) strcpy(sbuf.mtext, msg);
-    msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, IPC_NOWAIT);
 }
 
 ServerData * newServerData() {
@@ -103,11 +95,19 @@ void checkIncomingConnections(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
+    logging("Connecting client...", 1);
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
     changeSeatMoney(index, STARTING_BALANCE);
     updateBalance(serverData, index);
+    char msg[30];
+    char str[3];
+    sprintf(str, "%d", index);
+    strcpy(msg, "Client ");
+    strcat(msg, str);
+    strcat(msg, " connected.");
+    logging(msg, 1);
     printf("Client connected in spot %d.\n", index);
 }
 
@@ -163,7 +163,7 @@ void closeServer() {
     }
     logging("Closing server...", 1);
     deleteServerData(serverData);
-    logging("Server closed", 1);
+    logging("Server closed.", 1);
     printf("Closing Server..\n");
     exit(1);
 }
