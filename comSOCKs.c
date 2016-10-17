@@ -1,6 +1,5 @@
 #include "com.h"
 #include "comSOCKs.h"
-#include "blackjacklib.h"
 
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
@@ -23,7 +22,6 @@ Connection * comConnect(ComAddress * addr) {
     timeout.tv_usec = 0;
     struct sockaddr_un clientAddr;
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    //printf("%d\n", fd);
     if(fd == -1) {
         return NULL;
     }
@@ -31,7 +29,6 @@ Connection * comConnect(ComAddress * addr) {
     clientAddr.sun_family = AF_UNIX;
     strncpy(clientAddr.sun_path, addr->path, sizeof(clientAddr.sun_path) - 1);
     if(connect(fd, (struct sockaddr *) &clientAddr, sizeof(clientAddr)) == -1) {
-        printf("NO CONECTA\n");
         return NULL;
     }
     connection->socketFD = fd;
@@ -39,7 +36,6 @@ Connection * comConnect(ComAddress * addr) {
     int test = comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
         comWrite(connection, buffer, MAX_BUF);
-        printf("CONNECTED\n");
         return connection;
     } 
     return connection;
@@ -50,9 +46,7 @@ ComAddress * comListen(ComAddress * addr) {
     int sock;
     struct sockaddr_un clientName;
     socklen_t cliNameLen;
-    //printf("ESCUCHO a %d\n", addr->socketFD);
     if ((sock = accept(addr->socketFD, (struct sockaddr*)&clientName, &cliNameLen)) <= 0) {
-        printf("SE CONNECTO NADIE AUN\n");
         return NULL;
     }
     ComAddress * aux = newComAddress(addr->path);
@@ -66,7 +60,6 @@ Connection * comAccept(ComAddress * addressToAccept) {
     char buffer[MAX_BUF];
     strcpy(buffer, SUCCESS);
     int i = comWrite(connection, buffer, MAX_BUF);
-    //printf("%d\n", i);
     int test = comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
         return connection;

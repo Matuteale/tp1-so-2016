@@ -1,13 +1,6 @@
 #include "com.h"
 #include "comFIFOs.h"
 
-#define MAX_BUF 1024
-#define MAX_PID_LENGTH 20
-
-// MSGS CODES
-#define SUCCESS "1"
-#define FAIL "0"
-
 Connection * newConnection() {
     Connection * connection = malloc(sizeof(Connection));
     return connection;
@@ -40,8 +33,6 @@ ComAddress * comListen(ComAddress * address) {
 
     char * path = malloc(strlen(buffer)+1);
     strcpy(path, buffer);
-
-    close(inputAuxFD);
 
     ComAddress * aux = newComAddress(path);
 
@@ -81,7 +72,6 @@ Connection * comAccept(ComAddress * addressToAccept) {
 
     if (strcmp(buffer, SUCCESS) == 0) {
         comWrite(connection, buffer, MAX_BUF);
-        printf("CONNECTED\n");
         return connection;
     } else {
         disconnect(connection);
@@ -147,7 +137,6 @@ Connection * comConnect(ComAddress * address) {
     /* Waiting for SRV response */
     comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
-        printf("CONNECTED\n");
         return connection;
     } else {
         disconnect(connection);

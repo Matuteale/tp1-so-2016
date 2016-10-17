@@ -7,17 +7,20 @@
 #include <arpa/inet.h>
 #include <regex.h>
 
-typedef struct Connection
-{
-	char* ip;
-	in_port_t port; // equivalente a uint16_t
+#define MAX_BUF 1024
+
+// MSGS CODES
+#define SUCCESS "1"
+#define FAIL "0"
+
+typedef struct Connection {
+	//char* ip;
+	//in_port_t port;
 	int socketFD;
 };
+
 typedef struct ComAddress {
     char * path;
-    char * port;    
+    char * port;
     int socketFD;
 };
-
-
-/** Address format xxx.xxx.xxx.xxx:PPPPP **/

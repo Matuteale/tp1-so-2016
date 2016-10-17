@@ -2,8 +2,8 @@
 #define SERVER_H
 
 #include "com.h"
-#include "comSOCKs.h"
 #include "blackjacklib.h"
+#include "logging.h"
 
 typedef struct ServerData{
 	ComAddress * srvAddress;
@@ -19,35 +19,35 @@ void deleteServerData(ServerData * serverData);
 
 // Connection related functions ---------------------------------------------------------------
 
-int emptySpots(ServerData * serverData);
-int firstEmptySpot(ServerData * serverData);
-void checkIncomingConnections(ServerData * serverData);
-void addClient(Connection * connection, ServerData * serverData);
-int disconnectClient(ServerData * serverData, int index);
-int hasBeenDisconnected(ServerData * serverData, int index);
-int checkConnection(ServerData * serverData, int index);
-void checkCurrentConnections(ServerData * serverData);
+int emptySpots();
+int firstEmptySpot();
+void checkIncomingConnections();
+void addClient(Connection * connection);
+int disconnectClient(int index);
+int hasBeenDisconnected(int index);
+int checkConnection(int index);
+void checkCurrentConnections();
 void closeServer();
 void validateConfig();
 
 // Game related functions ----------------------------------------------------------------------
 
-void generateDeck(ServerData * serverData);
-void shuffleDeck(ServerData * serverData);
-int requestBetTo(ServerData * serverData, int index);
-void requestBetToPlayers(ServerData * serverData);
-int isBetValid(ServerData * serverData, int index, int bet);
-void updateBalance(ServerData * serverData, int index);
+void generateDeck();
+void shuffleDeck();
+int requestBetTo(int index);
+void requestBetToPlayers();
+int isBetValid(int index, int bet);
+void updateBalance(int index);
 char requestPlay(Connection * Connection);
-void askPlayersForHit(ServerData * serverData);
-void deal(ServerData * serverData, int index);
-void updateClientsOnDeal(ServerData * serverData, Deal * deal);
-void updateClientsOnBet(ServerData * serverData, Bet * bet);
-void updateClientsOn(ServerData * serverData, char action);
-void updateClientsOnIndex(ServerData * serverData, int index, char action);
-void payWinners(ServerData * serverData);
-void dealInitialCards(ServerData * serverData);
-void croupierPlay(ServerData * serverData);
-void startRound(ServerData * serverData);
+void askPlayersForHit();
+void deal(int index);
+void updateClientsOnDeal(Deal * deal);
+void updateClientsOnBet(Bet * bet);
+void updateClientsOn(char action);
+void updateClientsOnIndex(int index, char action);
+void payWinners();
+void dealInitialCards();
+void croupierPlay();
+void startRound();
 
 #endif

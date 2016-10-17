@@ -1,8 +1,6 @@
 //Basado en las instrucciones de https://users.cs.cf.ac.uk/Dave.Marshall/C/node25.html
 
 #include "logging.h"
-#include <stdio.h>
-#include <signal.h>
 
 void closeLoggingServer();
 

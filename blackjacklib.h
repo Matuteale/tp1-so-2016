@@ -37,16 +37,17 @@
 #define FAIL "0"
 
 // ACTIONS
-#define BET 'A'
-#define PLAY 'B'
-#define DEAL 'C'
-#define CLEARSEAT 'D'
-#define CLEARTABLE 'E'
-#define SHUFFLE 'F'
-#define SETACTIVE 'G'
-#define SETUNACTIVE 'H'
-#define UPDATEBALANCE 'I'
-#define UPDATEBET 'J'
+#define BET 10
+#define PLAY 11
+#define DEAL 12
+#define CLEARSEAT 13
+#define CLEARTABLE 14
+#define SHUFFLE 15
+#define SETACTIVE 16
+#define SETUNACTIVE 17
+#define UPDATEBALANCE 18
+#define UPDATEBET 19
+#define DISCONNECT 20
 
 typedef struct Card{
 	char figure;

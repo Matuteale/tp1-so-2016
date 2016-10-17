@@ -1,4 +1,3 @@
-#include "blackjacklib.h"
 #include "client.h"
 
 ClientData * clientData;
@@ -21,7 +20,7 @@ int main() {
     while(1) {
         clearScreen();
         showTable(clientData->gameTable);
-        waitForServer(clientData);
+        waitForServer();
         usleep(CLOCK);
     }
 
@@ -38,7 +37,7 @@ void deleteClientData(ClientData * clientData) {
     free(clientData);
 }
 
-void askToQuit(ClientData * clientData) {
+void askToQuit() {
 
     char c;
 
@@ -53,70 +52,70 @@ void askToQuit(ClientData * clientData) {
 }
 
 void disconnectClient() {
-    printf("\n");
     sendChar(clientData->serverConnection, NULL);
     sendInt(clientData->serverConnection,0);
     disconnect(clientData->serverConnection);
     deleteTable(clientData->gameTable);
     deleteClientData(clientData);
-    printf("Closing Client..\n");
+    printf("\nClient closed..\n");
     exit(1);
 }
 
-void waitForServer(ClientData * clientData) {
+void waitForServer() {
 
     printf("Waiting for turn...\n");
 
     char c = requestChar(clientData->serverConnection);
-    //DEBUG printf("ACTION SENT: %c\n", c);
+
     switch(c) {
         case BET: {
-            bet(clientData);
+            bet();
             break;
         }
         case PLAY: {
-            play(clientData);
+            play();
             break;
         }
         case DEAL: {
-            deal(clientData);
+            deal();
             break;
         }
         case CLEARSEAT: {
-            clearSeatAction(clientData);
+            clearSeatAction();
             break;
         }
         case CLEARTABLE: {
-            clearTableAction(clientData);
+            clearTableAction();
             break;
         }
         case SHUFFLE: {
-            shuffleAction(clientData);
+            shuffleAction();
             break;
         }
         case SETACTIVE: {
-            setActiveAction(clientData);
+            setActiveAction();
             break;
         }
         case SETUNACTIVE: {
-            setUnActiveAction(clientData);
+            setUnActiveAction();
             break;
         }
         case UPDATEBALANCE: {
-            updateBalance(clientData);
+            updateBalance();
             break;
         }
         case UPDATEBET: {
-            updateBet(clientData);
+            updateBet();
+            break;
+        }
+        case DISCONNECT: {
+            disconnectClient();
             break;
         }
     }
 }
 
-void bet(ClientData * clientData) {
-
-    //struct timeval start, stop;
-    //gettimeofday(&start, NULL);
+void bet() {
 
     int valid = 0;
 
@@ -146,7 +145,7 @@ void bet(ClientData * clientData) {
     }
 }
 
-void play(ClientData * clientData) {
+void play() {
 
     char ans;
     do {
@@ -160,52 +159,52 @@ void play(ClientData * clientData) {
     sendChar(clientData->serverConnection, ans);
 }
 
-void deal(ClientData * clientData) {
+void deal() {
 
     Deal * deal = requestDeal(clientData->serverConnection);
     addCardToSeat(newCard(deal->card), clientData->gameTable->seats[deal->playerNumber]);
     deleteDeal(deal);
 }
 
-void clearSeatAction(ClientData * clientData) {
+void clearSeatAction() {
 
     int playerNumber = requestInt(clientData->serverConnection);
 
     clearSeat(clientData->gameTable->seats[playerNumber]);
 }
 
-void clearTableAction(ClientData * clientData) {
+void clearTableAction() {
 
     clearTable(clientData->gameTable);
 }
 
-void shuffleAction(ClientData * clientData) {
+void shuffleAction() {
 
     printf("Deck is being Shuffled ...");
 
     sleep(SCREEN_TIME); //SOLO ESTETICO
 }
 
-void setActiveAction(ClientData * clientData) {
+void setActiveAction() {
 
     int playerNumber = requestInt(clientData->serverConnection);
 
     setActive(clientData->gameTable->seats[playerNumber]);
 }
 
-void setUnActiveAction(ClientData * clientData) {
+void setUnActiveAction() {
 
     int playerNumber = requestInt(clientData->serverConnection);
 
     setUnActive(clientData->gameTable->seats[playerNumber]);
 }
 
-void updateBalance(ClientData * clientData) {
+void updateBalance() {
 
     clientData->balance = requestInt(clientData->serverConnection);
 }
 
-void updateBet(ClientData * clientData) {
+void updateBet() {
     Bet * bet = requestBet(clientData->serverConnection);
 
     clientData->gameTable->seats[bet->playerNumber]->currentBet = bet->bet;

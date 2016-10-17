@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/msg.h>
 #include <sys/ipc.h>
@@ -11,5 +13,5 @@ typedef struct msgbuf {
 //type = 1->Info
 //type = 2->Warning
 //type = 3->Error
-void logging(char * msg, int type);
+void logg(char * msg, int type);
 void startLogging();
