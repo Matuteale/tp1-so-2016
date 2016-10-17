@@ -144,12 +144,14 @@ void checkCurrentConnections(ServerData * serverData) {
 }
 
 void closeServer() {
+    logging("Closing server...", 1);
     int i;
     printf("\n");
     for (i = 0; i < PLAYERS; i++) {
         disconnectClient(serverData, i);
     }
     deleteServerData(serverData);
+    logging("Server closed.", 1);
     printf("Closing Server..\n");
     exit(1);
 }
