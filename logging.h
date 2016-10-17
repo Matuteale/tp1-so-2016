@@ -16,4 +16,3 @@ int msqid; //queue identificator
 //type = 2->Warning
 //type = 3->Error
 void logging(char * msg, int type);
-void createLoggingSystem();

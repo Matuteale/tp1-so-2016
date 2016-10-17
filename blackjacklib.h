@@ -102,6 +102,7 @@ void clearScreen();
 // Utilities -----------------------------------------------------------------------------------
 void clearBuffer(char * buffer, int size);
 int indexOf(char * str, char letter);
+char getCharacter();
 char * getStr(int size);
 int getInt(int size);
 int charToInt(char c);

@@ -1,5 +1,5 @@
 #include "marshalling.h"
-#include "comFIFOs.h" //TODO: REMOVER, ES SOLO PARA TEST
+//DEBUG #include "comFIFOs.h" //TODO: REMOVER, ES SOLO PARA TEST
 
 char requestChar(Connection * connection) {
 

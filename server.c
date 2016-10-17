@@ -1,11 +1,12 @@
 #include "blackjacklib.h"
 #include "server.h"
+#include "logging.h"
 
 ServerData * serverData;
 
 int main() {
-
-    createLoggingSystem();
+    msgctl(msgget(key, msgflg), IPC_RMID, NULL); //Deletes de msg queue
+    msqid = msgget(key, msgflg);
 
     validateConfig();
 
@@ -41,6 +42,13 @@ int main() {
     }
 
     return 0;
+}
+
+void logging(char * msg, int type){
+    message_buf sbuf;
+    sbuf.mtype = type;
+    (void) strcpy(sbuf.mtext, msg);
+    msgsnd(msqid, &sbuf, strlen(sbuf.mtext) + 1, IPC_NOWAIT);
 }
 
 ServerData * newServerData() {
@@ -95,19 +103,11 @@ void checkIncomingConnections(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
-    logging("Connecting client...", 1);
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
     changeSeatMoney(index, STARTING_BALANCE);
     updateBalance(serverData, index);
-    char msg[30];
-    char str[3];
-    sprintf(str, "%d", index);
-    strcpy(msg, "Client ");
-    strcat(msg, str);
-    strcat(msg, " connected.");
-    logging(msg, 1);
     printf("Client connected in spot %d.\n", index);
 }
 
@@ -120,13 +120,6 @@ int disconnectClient(ServerData * serverData, int index) {
     clearSeat(serverData->gameTable->seats[index]);
     updateClientsOnIndex(serverData, index, CLEARSEAT);
     changeSeatMoney(index, 0);
-    char msg[30];
-    char str[3];
-    sprintf(str, "%d", index);
-    strcpy(msg, "Client ");
-    strcat(msg, str);
-    strcat(msg, " disconnected.");
-    logging(msg, 1);
     printf("Client in spot %d disconnected.\n", index); //DEBUG SERVER
     return 1;
 }
@@ -138,7 +131,6 @@ int hasBeenDisconnected(ServerData * serverData, int index) {
 int checkConnection(ServerData * serverData, int index) {
     if (serverData->connectedBoolean[index] == 1) {
         if (hasBeenDisconnected(serverData, index)) {
-            logging("Disconnecting client...", 1);
             disconnectClient(serverData, index);
             return 0;
         }
@@ -158,12 +150,9 @@ void closeServer() {
     int i;
     printf("\n");
     for (i = 0; i < PLAYERS; i++) {
-        logging("Disconnecting client...", 1);
         disconnectClient(serverData, i);
     }
-    logging("Closing server...", 1);
     deleteServerData(serverData);
-    logging("Server closed.", 1);
     printf("Closing Server..\n");
     exit(1);
 }
@@ -294,15 +283,8 @@ void updateBalance(ServerData * serverData, int index) {
 }
 
 char requestPlay(Connection * connection) {
-
-    char ans;
-
     sendChar(connection, PLAY);
-    char * str = requestStr(connection);
-    ans = str[0];
-
-    free(str);
-    return ans;
+    return requestChar(connection);
 }
 
 void askPlayersForHit(ServerData * serverData) {
@@ -312,9 +294,16 @@ void askPlayersForHit(ServerData * serverData) {
     for(index = 0; index < PLAYERS; index++) {
         if (checkConnection(serverData, index)) {
             updateClientsOnIndex(serverData, index, SETACTIVE);
-            while(serverData->gameTable->seats[index]->score <= MAX_SCORE &&
-                requestPlay(serverData->clientTable[index]) == 'H') {
-                deal(serverData, index);
+            while(serverData->gameTable->seats[index]->score <= MAX_SCORE) {
+                char c = requestPlay(serverData->clientTable[index]);
+                if (c == 'H') {
+                    deal(serverData, index);
+                } else {
+                    if (c == NULL) {
+                        disconnectClient(serverData, index);
+                    }
+                    break;
+                }
             }
         updateClientsOnIndex(serverData, index, SETUNACTIVE);
         }

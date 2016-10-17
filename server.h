@@ -4,7 +4,6 @@
 #include "com.h"
 #include "comFIFOs.h"
 #include "blackjacklib.h"
-#include "logging.h"
 
 typedef struct ServerData{
 	ComAddress * srvAddress;

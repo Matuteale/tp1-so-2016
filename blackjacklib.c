@@ -245,6 +245,19 @@ char * getStr(int size) {
 	return aux;
 }
 
+char getCharacter() {
+
+	char c;
+
+	char * aux = getStr(1);
+
+	c = aux[0];
+
+	free(aux);
+
+	return c;
+}
+
 int getInt(int size) {
 
 	char * string = getStr(size);

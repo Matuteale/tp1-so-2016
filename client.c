@@ -54,6 +54,8 @@ void askToQuit(ClientData * clientData) {
 
 void disconnectClient() {
     printf("\n");
+    sendChar(clientData->serverConnection, NULL);
+    sendInt(clientData->serverConnection,0);
     disconnect(clientData->serverConnection);
     deleteTable(clientData->gameTable);
     deleteClientData(clientData);
@@ -146,16 +148,16 @@ void bet(ClientData * clientData) {
 
 void play(ClientData * clientData) {
 
-    char * ans;
+    char ans;
     do {
         printf("Enter an action:  'H' | HIT -- 'S' | STAND\n");
-        ans = getStr(1);
+        ans = getCharacter();
         if (ans != NULL) {
-            ans[0] = toUpper(ans[0]);
+            ans = toUpper(ans);
         }
-    } while(ans == NULL || (strcmp(ans, "H") != 0 && strcmp(ans,"S") != 0));
+    } while(ans == NULL || (ans != 'H' && ans != 'S'));
 
-    sendStr(clientData->serverConnection, ans);
+    sendChar(clientData->serverConnection, ans);
 }
 
 void deal(ClientData * clientData) {
