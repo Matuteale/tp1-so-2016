@@ -2,8 +2,10 @@
 #define COMSOCKET_H
 #endif
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <regex.h>
 
 
 typedef struct Connection
@@ -14,6 +16,7 @@ typedef struct Connection
 };
 typedef struct ComAddress {
     char * path;
+    char * port;    
     int socketFD;
 };
 
