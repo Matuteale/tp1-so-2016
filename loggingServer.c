@@ -8,6 +8,9 @@ void closeLoggingServer();
 
 FILE * fp;
 
+const key_t key = 2195; //Shared key between sender and receiver
+const int msgflg = IPC_CREAT | 0666;
+int msqid; //queue identificator
 
 int main() {
     int msgQueueId;
