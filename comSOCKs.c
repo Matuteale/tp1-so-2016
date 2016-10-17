@@ -23,7 +23,7 @@ Connection * comConnect(ComAddress * addr) {
     timeout.tv_usec = 0;
     struct sockaddr_un clientAddr;
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    printf("%d\n", fd);
+    //printf("%d\n", fd);
     if(fd == -1) {
         return NULL;
     }
@@ -50,9 +50,9 @@ ComAddress * comListen(ComAddress * addr) {
     int sock;
     struct sockaddr_un clientName;
     socklen_t cliNameLen;
-    printf("ESCUCHO a %d\n", addr->socketFD);
+    //printf("ESCUCHO a %d\n", addr->socketFD);
     if ((sock = accept(addr->socketFD, (struct sockaddr*)&clientName, &cliNameLen)) <= 0) {
-        printf("NO HAY NADA\n");
+        printf("SE CONNECTO NADIE AUN\n");
         return NULL;
     }
     ComAddress * aux = newComAddress(addr->path);
@@ -66,7 +66,7 @@ Connection * comAccept(ComAddress * addressToAccept) {
     char buffer[MAX_BUF];
     strcpy(buffer, SUCCESS);
     int i = comWrite(connection, buffer, MAX_BUF);
-    printf("%d\n", i);
+    //printf("%d\n", i);
     int test = comRead(connection, buffer, MAX_BUF);
     if (strcmp(buffer, SUCCESS) == 0) {
         return connection;

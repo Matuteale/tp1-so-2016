@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <regex.h>
 
-
 typedef struct Connection
 {
 	char* ip;
