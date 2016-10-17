@@ -96,15 +96,18 @@ void checkIncomingConnections(ServerData * serverData) {
 }
 
 void addClient(Connection * connection, ServerData * serverData) {
+    logging("Connecting client..." , 1);
     int index = firstEmptySpot(serverData);
     serverData->clientTable[index] = connection;
     serverData->connectedBoolean[index] = 1;
     changeSeatMoney(index, STARTING_BALANCE);
     updateBalance(serverData, index);
+    logging("Client connected." , 1);
     printf("Client connected in spot %d.\n", index);
 }
 
 int disconnectClient(ServerData * serverData, int index) {
+    logging("Disconnecting client..." , 1);
     if (serverData->connectedBoolean[index] == 0) {
         return 0;
     }
@@ -113,6 +116,7 @@ int disconnectClient(ServerData * serverData, int index) {
     clearSeat(serverData->gameTable->seats[index]);
     updateClientsOnIndex(serverData, index, CLEARSEAT);
     changeSeatMoney(index, 0);
+    logging("Client disconnected.", 1);
     printf("Client in spot %d disconnected.\n", index); //DEBUG SERVER
     return 1;
 }
