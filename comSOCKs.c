@@ -113,6 +113,9 @@ int openListener(ComAddress * address) {
 
 
 int isConnected(Connection * connection) {
+	if(send(connection->socketFD, "c", 1, MSG_NOSIGNAL) == -1){
+		return -1;
+	}
 	return 0;
 }
 
