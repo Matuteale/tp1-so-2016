@@ -118,7 +118,12 @@ int disconnectClient(ServerData * serverData, int index) {
 }
 
 int hasBeenDisconnected(ServerData * serverData, int index) {
-    return !isConnected(serverData->clientTable[index]);
+    int i;
+    if(! (i =isConnected(serverData->clientTable[index]))) {
+        printf("%d\n", i);
+        return 0;
+    }
+    return 1;
 }
 
 int checkConnection(ServerData * serverData, int index) {

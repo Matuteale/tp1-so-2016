@@ -2,7 +2,7 @@
 #define CLIENT_H
 
 #include "com.h"
-#include "comFIFOs.h"
+#include "comSOCKs.h"
 #include "blackjacklib.h"
 
 typedef struct ClientData{
